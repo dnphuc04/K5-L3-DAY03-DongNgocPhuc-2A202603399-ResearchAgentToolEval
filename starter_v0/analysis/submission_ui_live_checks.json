@@ -1,0 +1,8 @@
+{
+  "ui_initial_render": "PASS",
+  "live_transcript": "v3.4_submission_live_20261110T121557.transcript.json",
+  "live_turns": 3,
+  "url_dedupe_removed": 1,
+  "missing_url_awaits_user": true,
+  "title_dedupe_removed": 1
+}

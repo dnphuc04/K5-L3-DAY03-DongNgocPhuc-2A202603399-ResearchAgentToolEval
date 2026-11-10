@@ -1,0 +1,11 @@
+﻿case_id,v2_pass,v3_4_pass,v3_4_failures
+G01_handle_without_at,True,True,[]
+G02_news_week,True,True,[]
+G03_top_social,True,True,[]
+G04_missing_link,False,True,[]
+G05_dedupe_existing_items,True,True,[]
+G06_fill_handle,True,True,[]
+G07_correct_handle,True,True,[]
+G08_correct_limit,True,True,[]
+G09_change_timeframe,False,True,[]
+G10_switch_source,True,True,[]

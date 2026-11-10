@@ -1,0 +1,24 @@
+{
+  "transcript_id": "ui_20261110T114849_27d2d028",
+  "version": "v2",
+  "artifact_version": "v2+p5557e29be07f+t1f08a299bf2a",
+  "prompt_hash": "5557e29be07fdb671e73cd492526a62835e149502659e8b5777107eb6514c071",
+  "tools_hash": "1f08a299bf2a5d15516689924aeb936278c61eade77ee7ce55aee388340bf723",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "created_at": "2026-11-10T11:48:49",
+  "system_prompt": "C:\\Users\\VU-HOANG-DZ\\Downloads\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\VU-HOANG-DZ\\Downloads\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "interface": "streamlit",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-11-10T11:57:46",
+      "user": "thời tiết hà nội hôm nay",
+      "status": "provider_error",
+      "error": "UnicodeEncodeError: Không kết nối được provider. Kiểm tra key, mạng và model.",
+      "ended_at": "2026-11-10T11:57:50"
+    }
+  ],
+  "updated_at": "2026-11-10T11:57:50"
+}

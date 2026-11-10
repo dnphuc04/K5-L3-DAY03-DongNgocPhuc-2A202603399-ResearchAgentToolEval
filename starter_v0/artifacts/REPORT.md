@@ -1,69 +1,76 @@
-# Day 03 Lab v2 Report — Research Agent
-
-> File này gồm 2 phần, deadline khác nhau:
-> - **PHẦN A — Giới thiệu agent**: ngắn gọn 1 trang để team khác hiểu nhanh agent có tool gì, làm được gì, thử bằng câu hỏi nào. **Xong trước 16:30** để làm tài liệu phụ trợ khi demo. Có thể làm thành poster HTML/SVG (`artifacts/poster.html` / `poster.svg`) để show cho team cùng zone.
-> - **PHẦN B — Chi tiết / Bằng chứng**: bảng đầy đủ (v0–v3, failure, eval, chat) dựa trên log thật. **Có thể hoàn thiện sau buổi debate để nộp bài.**
+# Day 03 — Research Agent: Báo cáo nộp bài
 
 ## Team
 
-- Team:
-- Members:
-- Provider/model:
-
----
+- Repo: dnphuc04/K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval.
+- Phân công: Phúc tối ưu prompt/tools và version log; A viết dedupe và unit test; B phân tích lỗi, 10 case nhóm và bằng chứng; UI Streamlit đã bổ sung tại app.py.
+- Danh sách họ tên đầy đủ của A/B/C: cần trưởng nhóm bổ sung trước khi nộp; không suy đoán từ tên thư mục máy.
+- Provider/model: OpenAI / gpt-4o-mini. Snapshot đo chuẩn: `v3.4+p41ab063811a5+t3b41d41b278e`; xem kết quả bộ tools mở rộng cuối tại mục B3 bổ sung.
 
 # PHẦN A — Giới thiệu agent
 
-## A1. Agent này làm được gì
+## A1. Agent làm được gì
 
-> 1–2 câu mô tả agent dùng để làm gì (cho team khác hiểu nhanh).
+Trợ lý nghiên cứu chọn nguồn web, mạng xã hội, paper và chính sách nội bộ; đọc tài liệu, loại bỏ nguồn trùng và trình bày bản tin. Agent hỏi lại khi thiếu dữ liệu và yêu cầu xác nhận trước khi gửi Telegram.
 
-Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc URL, tổng hợp thành digest, và gửi lên Telegram khi được xác nhận."
-
-**Link dùng thử (deploy):**
-
-> Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
->
-> URL: 
+UI: http://localhost:8501 — chạy trên máy có server. Chưa có bằng chứng link public trong repo; localhost không phải link để máy khác truy cập.
+Khởi động: `python -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501`.
+Hướng dẫn: `UI_README.md`. Model và các API lấy dữ liệu cần key riêng trong .env trên máy chạy; không nộp .env.
 
 ## A2. Tool agent có
 
-> Liệt kê các tool agent đang dùng (gồm tool mới nhóm tự thêm). Mỗi tool 1 dòng: tên + làm được gì.
-
-| Tên tool | Làm được gì | Tool mới nhóm thêm? |
+| Tool | Chức năng | Tool mới? |
 |---|---|---|
-| clarify | hỏi lại người dùng khi thiếu thông tin | không |
-| dedupe | loại bỏ mục trùng URL hoặc tiêu đề trong danh sách đã có; giữ mục đầu tiên | có — A viết code/test; B viết case G05. Chưa tích hợp declaration vào tools.yaml |
+| clarify | Hỏi lại khi thiếu thông tin hoặc cần xác nhận gửi | Có sẵn |
+| timeline | Lấy bài đăng từ tài khoản X | Có sẵn |
+| social_search | Tìm bài đăng theo chủ đề | Có sẵn |
+| lookup | Tìm web/tin tức | Có sẵn |
+| fetch | Đọc URL | Có sẵn |
+| format | Trình bày danh sách thành bản tin | Có sẵn |
+| send | Gửi Telegram khi đã xác nhận | Có sẵn |
+| policy | Tra cứu chính sách nội bộ | Có sẵn |
+| papers | Tìm paper arXiv | Có sẵn |
+| paper_text | Tải/trích text paper arXiv | Có sẵn |
+| dedupe | Bỏ trùng URL/tiêu đề, giữ mục đầu tiên | Có |
+| text_stats | Thống kê văn bản | Có |
+| wiki_search | Tìm Wikipedia | Có |
+| export_report | Lưu báo cáo cục bộ | Có |
+| data_calc | Tính toán số liệu | Có |
 
-## A3. Câu hỏi mẫu để thử
+## A3. Câu hỏi demo
 
-> 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
-
-1.
-2.
-3.
-
----
+1. Lấy 3 tweet gần nhất của @NASA.
+2. Tìm 4 tin tức web về robotics trong tuần này.
+3. Tóm tắt bài báo này (chưa gửi URL) — kiểm tra agent hỏi lại.
+4. Bỏ trùng URL, giữ mục đầu tiên: [{"title":"A","url":"https://www.example.com/post/"},{"title":"A copy","url":"https://example.com/post?utm_source=demo#intro"},{"title":"B","url":"https://example.com/other"}].
+5. Sau khi tìm tin hôm nay, yêu cầu đổi sang tháng này nhưng giữ chủ đề và số lượng.
 
 # PHẦN B — Chi tiết / Bằng chứng
 
 ## B1. Version Evidence
 
-Fill from `artifacts/version_log.csv` and `runs/*.json`.
+Nguồn đầy đủ: `artifacts/version_log.csv`, các snapshot trong `artifacts/versions/` và JSON trong runs/. Không coi kết quả của các suite khác nhau là cùng một phép đo.
 
-| Version | Changed Artifact | Hypothesis | Metric Before | Metric After | Run File |
-|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |
-| v1 |  |  |  |  |  |
-| v2 |  |  |  |  |  |
-| v3 |  |  |  |  |  |
+| Version | Thay đổi/giả thuyết | Case accuracy (base) | Routing | Arguments | Run |
+|---|---|---:|---:|---:|---|
+| v0 | Baseline có key tool; đo hành vi starter | 65% | 75% | 65% | `runs/v0_B_base_openai_20261110T100659529223.json` |
+| v1 | Thay đoán thông tin bằng hỏi lại | 85% | 90% | 85% | `runs/v1_B_base_openai_20261110T103431763218.json` |
+| v2 | Thêm declaration dedupe; giữ prompt v1 | 85% | 90% | 85% | `runs/v2_B_base_openai_20261110T104542401677.json` |
+| v3 | Thử tối ưu routing và boundary; có regression | 75% | 80% | 75% | `runs/v3_B_base_openai_20261110T111133270464.json` |
+| v3.4 | Làm rõ nguồn đang hoạt động, hủy nguồn và carryover; bản cuối | 100% | 100% | 100% | `runs/v3.4_B_base_openai_20261110T113721523019.json` |
+
+Baseline chính của nhóm là 65%; B có một lần chạy khác cùng artifact đạt 75% (`runs/v0_B_base_openai_20261110T103030701042.json`). Không thay thế/chọn baseline có lợi; hai lần chạy khác nhau chứng tỏ kết quả model có thể biến động. B2 phân tích lần chạy của B. Các bản v3.1–v3.3 có log và snapshot riêng; không xóa regression. Kết quả cuối 100% trên bộ hữu hạn chưa chứng minh tổng quát hóa.
 
 ## B2. Failure Analysis
+
+
+
+
 
 Phân tích bởi B, nguồn: `runs/v0_B_base_openai_20261110T103030701042.json`.
 Provider/model: OpenAI / gpt-4o-mini. Artifact: `v0+peb1c8179815b+t5b22a2476d41`.
 Baseline: 15/20 case pass (75%), routing 80%, arguments 75%, multi turn 100%, provider errors 0.
-Các đề xuất dưới đây chưa được kiểm chứng bằng v1–v3.
+Đây là phân tích tại thời điểm v0; kết quả các bản cải thiện được ghi tại B1/B3.
 
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
@@ -75,86 +82,84 @@ Các đề xuất dưới đây chưa được kiểm chứng bằng v1–v3.
 
 R08/R12 không thực sự gửi Telegram: tool trả `needs_confirmation`. R10/R11/R13 có lỗi tool do thiếu RAPIDAPI_KEY, FIRECRAWL_API_KEY hoặc TAVILY_API_KEY. Không có provider_error không có nghĩa API tool đã hoạt động. Các lỗi setup này cần theo dõi riêng với lỗi chọn tool/args.
 
+
+
+
+
 ## B3. Team Eval Cases
 
-Đã viết 10 case trong `data/eval_group.json`: G01–G05 single turn, G06–G10 multi turn.
-Đã chạy suite nhóm trên v2, artifact `v2+p5557e29be07f+t1f08a299bf2a`: 8/10 pass, case_accuracy=0.8, routing=1.0, argument_accuracy=0.8, multiturn_accuracy=0.8, provider_error_cases=0.
-Run: `runs/v2_B_group_openai_20261110T111141081146.json`. Phân tích: `analysis/B_v2_group_results.csv`; kiểm tra bổ sung: `analysis/B_v2_manual_checks.json`.
-G04 hỏi xin link/nội dung đúng, runtime mặc định response_type=text nhưng bộ chấm yêu cầu args ghi rõ nên fail. Đây là khác biệt giữa hành vi thực tế và chấm args tường minh; không sửa expect sau khi thấy kết quả.
-G09 thiếu topic=news: đây là lỗi arguments có ảnh hưởng thực tế vì lookup mặc định general. Đề xuất Phúc bổ sung quy tắc giữ topic news khi đổi timeframe qua nhiều lượt.
-G05 đã xác nhận từ log thật: model truyền nguyên 3 mục, giữ đúng mục đầu/thứ ba, item_count=2, removed=1. Query của G02/G03/G08/G09/G10 đều là robotics. Các case gọi web/tweet vẫn trả lỗi thiếu TAVILY_API_KEY hoặc RAPIDAPI_KEY trên máy B; PASS chỉ phản ánh routing/args.
-Lần thử trước `runs/v2_B_group_openai_20261110T111059265125.json` có 10 APIConnectionError, measured_cases=0 do lỗi kết nối trong môi trường hạn chế; không dùng điểm 0 đó để đánh giá model. Run thành công phía trên là kết quả được dùng.
+10 case giữ nguyên giữa lần đo v2 và v3.4: 5 single turn + 5 multi turn, có G05 cho tool mới.
 
-| Case ID | What It Tests | Expected Tool/Behavior | Result |
-|---|---|---|---|
-| G01_handle_without_at | Single: chuẩn hóa @NASA và số lượng | timeline(screenname=NASA, limit=3) | PASS |
-| G02_news_week | Single: tin web tuần này | lookup(topic=news, timeframe=week, max_results=4) | PASS |
-| G03_top_social | Single: tweet phổ biến thay vì mới nhất | social_search(search_type=Top, limit=2) | PASS |
-| G04_missing_link | Single: thiếu link/nội dung | clarify(response_type=text), câu hỏi xin URL/nội dung | FAIL: response_type: expected 'text', got None |
-| G05_dedupe_existing_items | Single: tool mới, bỏ trùng URL trên dữ liệu có sẵn | Chỉ dedupe(by=url); truyền nguyên 3 mục, đầu ra giữ Tin A/Tin B, item_count=2, removed=1 | PASS |
-| G06_fill_handle | Multi: bổ sung handle sau khi được hỏi | timeline(screenname=NASA, limit=4) | PASS |
-| G07_correct_handle | Multi: sửa handle ở lượt cuối | Chỉ timeline(screenname=SpaceX, limit=2) | PASS |
-| G08_correct_limit | Multi: sửa số lượng, giữ chủ đề và cách sắp xếp | social_search(search_type=Latest, limit=2), chủ đề robotics | PASS |
-| G09_change_timeframe | Multi: đổi ngày sang tháng, giữ số lượng | lookup(topic=news, timeframe=month, max_results=3), chủ đề robotics | FAIL: topic: expected 'news', got None |
-| G10_switch_source | Multi: chuyển tweet sang web | Chỉ lookup(topic=news, timeframe=day, max_results=3), chủ đề robotics | PASS |
+| Case | Loại | Expected calls/args | v2 | v3.4 |
+|---|---|---|---|---|
+| G01_handle_without_at | Single | `timeline({"screenname": "NASA", "limit": 3})` | PASS | PASS |
+| G02_news_week | Single | `lookup({"topic": "news", "timeframe": "week", "max_results": 4})` | PASS | PASS |
+| G03_top_social | Single | `social_search({"search_type": "Top", "limit": 2})` | PASS | PASS |
+| G04_missing_link | Single | `clarify({"response_type": "text"})` | FAIL | PASS |
+| G05_dedupe_existing_items | Single | `dedupe({"by": "url"})` | PASS | PASS |
+| G06_fill_handle | Multi | `timeline({"screenname": "NASA", "limit": 4})` | PASS | PASS |
+| G07_correct_handle | Multi | `timeline({"screenname": "SpaceX", "limit": 2})` | PASS | PASS |
+| G08_correct_limit | Multi | `social_search({"search_type": "Latest", "limit": 2})` | PASS | PASS |
+| G09_change_timeframe | Multi | `lookup({"topic": "news", "timeframe": "month", "max_results": 3})` | FAIL | PASS |
+| G10_switch_source | Multi | `lookup({"topic": "news", "timeframe": "day", "max_results": 3})` | PASS | PASS |
 
-Kiểm tra offline và log: `analysis/B_validation.txt`, script tái lập: `scripts/validate_group_b.py`.
-Case G05 không chấm tự động args.items vì harness hiện sắp xếp list object bằng sorted, gây TypeError. Vì vậy phải kiểm tra actual_tool_calls.args.items giữ nguyên dữ liệu/thứ tự và tool_results đúng đầu ra. G02/G03/G08/G09/G10 cần kiểm tra thủ công query còn đúng chủ đề; G04 cần kiểm tra nội dung câu hỏi. Multi turn hiện chỉ chấm hành vi lượt cuối với các lượt trước làm ngữ cảnh.
+v2: 8/10, routing=100%, args=80%, multi=80%. v3.4: 10/10, routing/args/multi=100%, provider_error=0.
+Run v2: `runs/v2_B_group_openai_20261110T111141081146.json`.
+Run v3.4 của B: `runs/v3.4_B_group_openai_20261110T121028534135.json`.
+So sánh: `analysis/B_v2_v3_4_rerun_comparison.csv`; đối chiếu dữ liệu: `analysis/B_v3_4_rerun_checks.json`.
 
-Cập nhật v2 từ commit `69c5ffd`: Phúc đã tích hợp dedupe vào tools.yaml; file declaration.proposed chỉ còn là đề xuất lịch sử. Contract + dedupe unit tests: 68 passed. Chưa sửa prompt/tools khi đo suite nhóm; giữ nguyên 10 case để so sánh với v3 sau này.
+G04 v2 hỏi đúng nhưng không ghi response_type=text tường minh; runtime có default đúng nên cần phân biệt lỗi chấm args và lỗi hành vi. G09 thiếu topic=news làm runtime dùng general, là lỗi chức năng. Cả hai đã pass tại v3.4.
+G05 được kiểm tra input nguyên 3 mục và output giữ A/B, removed=1, item_count=2. Không đưa items dạng list object vào expected args vì harness sorted(list_of_dict) gây TypeError; lưu kiểm tra riêng. Query các case tìm kiếm đã đối chiếu là robotics. Multi turn trong eval chỉ chấm lượt cuối với lịch sử làm ngữ cảnh, khác với chạy chat nhiều lượt thật.
+
+8 case trong run cuối của B có tool error do thiếu key lấy dữ liệu. Vì vậy PASS là bằng chứng routing/arguments, chưa phải lấy dữ liệu live thành công. Nhóm có smoke log riêng `runs/v0_tool_smoke.json`; không dùng smoke log cũ để khẳng định trạng thái key hiện tại.
+Lần lỗi mạng `runs/v2_B_group_openai_20261110T111059265125.json` có measured_cases=0; được giữ để truy vết, không dùng làm điểm model.
 
 ## B4. Live Chat Evidence
 
-Use `transcripts/*.transcript.json`.
+Nguồn: `transcripts/v3.4_submission_live_20261110T121557.transcript.json`, artifact `v3.4+p41ab063811a5+t3b41d41b278e`. Đây là 3 lượt kiểm tra được script gửi tới model thật, không phải log mô phỏng hoặc buổi người dùng thao tác UI; script: `scripts/submission_live_check.py`. Các transcript CLI/UI thực tế trước đó cũng giữ trong transcripts/.
 
-| Turn | User Request | Tool Calls | Version Evidence | Outcome |
-|---|---|---|---|---|
-|  |  |  |  |  |
-
-## B5. Bonus Evidence
-
-Only fill if your team did bonus.
-
-| Bonus | Evidence File | What Worked | Risk / Guardrail |
+| Lượt | Yêu cầu | Tool | Trạng thái |
 |---|---|---|---|
-| send (Telegram) |  |  |  |
-| arXiv/company policy |  |  |  |
-| UI |  |  |  |
-| Tool mới dedupe (A) và eval G05 (B) | tools/dedupe/TOOL.md; tests/test_tool_dedupe.py; data/eval_group.json; analysis/B_validation.txt | 8 unit test của A pass; B xác nhận đầu ra mẫu G05 offline đúng | Chưa chứng minh model route đúng; thiếu declaration. Tool nhận list có phần tử không phải object vẫn giữ phần tử đó, cần A làm rõ contract |
+| 1 | Chỉ bỏ trùng URL, giữ mục đầu tiên, chưa định dạng | dedupe | answered |
+| 2 | Đọc bài báo này và tóm tắt giúp mình. Mình chưa gửi URL hoặc nội dung. | clarify | waiting_for_user |
+| 3 | Thôi không đọc bài nữa. Chỉ bỏ trùng theo tiêu đề trong danh sách mới này | dedupe | answered |
 
-Tool unit tests: số test đã viết, số bug tìm được trong tool có sẵn (nếu có), và một ví dụ lỗi mà unit test bắt được nhưng eval không bắt được.
+Lượt 1 xác minh bỏ trùng URL; lượt 2 agent dừng để xin URL; lượt 3 nhận yêu cầu thay thế và bỏ trùng tiêu đề. Không tính tin nhắn “exit” ở transcript cũ là lượt demo chức năng. Các transcript cũ ghi đúng v2, không đổi nhãn thành v3.4.
+
+## B5. Tool tests, UI và bonus
+
+- Toàn bộ suite: xem số lượng cuối trong `analysis/submission_pytest.txt`, không còn stub skip. 17 stub đã thay bằng assert chạy offline với fake HTTP, bao gồm guardrail gửi, mapping request/response, lỗi thiếu key, boundary và policy injection probe. `tests/test_tool_dedupe.py` có 8 test của A; 3 test dedupe bổ sung trong test_tools_todo.py. Bốn tool tích hợp cùng UI có 12 test tại tests/test_added_tools.py.
+- dedupe có TOOL.md, registry và declaration. Test kiểm tra chuẩn hóa URL/tiêu đề, thứ tự, missing field, input rỗng và input sai. List chứa phần tử không phải object hiện vẫn được giữ lại: giới hạn cần làm rõ nếu mở rộng contract.
+- UI Streamlit chính của nhóm tại app.py có chế độ offline và live (bật RESEARCH_AGENT_ENABLE_LIVE_MODE=true). Offline là chạy tool theo quy tắc/mẫu, không phải model routing. Giao diện live bổ sung giữ tại app_live.py: chat, xem tool và tải transcript. Chưa có link public. Hash ghi nhận prompt/tools thực tế.
+- Telegram chưa có bằng chứng gửi thật được xác nhận; chỉ khẳng định guardrail trong test offline và needs_confirmation ở log v0. Không thực hiện gửi ngoài để tạo bằng chứng.
+- arXiv/policy là tool starter; không tính chúng là tool mới của nhóm. Commit a8f881e bổ sung data_calc, text_stats, export_report, wiki_search cùng UI: tổng cộng 5 tool mới gồm dedupe. Cần người chấm đối chiếu chất lượng và điều kiện bonus.
+
+Lưu ý phiên bản: các điểm v3.4 phía trên dùng tools snapshot trước khi thêm 4 tool UI. Bộ tools hiện tại có hash mới, không được gán các điểm đó cho bộ tools mở rộng nếu chưa chạy lại. Có thể tái lập bằng --system-prompt artifacts/versions/v3.4/system_prompt.md --tools artifacts/versions/v3.4/tools.yaml.
 
 ## B6. Reflection
 
-- Which fixes belonged in `system_prompt.md`?
-- Which fixes belonged in `tools.yaml`?
-- Which failure needed manual review instead of automatic grading?
-- What would you improve next?
+System prompt chịu trách nhiệm về thiếu dữ liệu, phạm vi, xác nhận gửi và giữ/đổi/hủy thông tin qua nhiều lượt. Tool declarations làm rõ nguồn nào dùng khi nào và conventions của topic/timeframe/search_type/handle.
+R13 v0 cho thấy nhãn failure_type của dataset khác lỗi thực tế; cần đọc observed_mismatch và arguments. Query gần nghĩa có thể fail so khớp chuỗi. G04 cho thấy default đúng vẫn có thể fail khi chấm tham số tường minh.
+Unit test bắt lỗi request gửi sai hoặc guardrail hoạt động sai mà routing eval có thể bỏ qua. Probe chính sách kiểm tra instruction-like text nằm ở untrusted_text thay vì facts; đây không phải bảo đảm chống mọi prompt injection.
+Bước tiếp theo: kiểm tra tổng quát hóa trên case chưa thấy, sửa harness xử lý list object, bổ sung báo cáo độ tin cậy nhiều lần chạy, và xác nhận dữ liệu live trên môi trường đủ key.
 
-Nhận xét của B: dedupe phù hợp để làm sạch nguồn đã thu thập trước khi format, chạy local và không cần API key. Bộ test hiện bao phủ chuẩn hóa URL/tiêu đề, giữ mục đầu, input rỗng, sai kiểu list và sai by. Chưa có bằng chứng về routing live. Nên đưa quy tắc hỏi lại/phạm vi/xác nhận vào system_prompt; đưa điều kiện chọn tool và convention arguments vào tools.yaml. Hai điểm cần review thủ công là query gần nghĩa trong R13 và nội dung items/đầu ra trong G05. Chưa sửa harness hoặc implementation của A trong phần việc B.
+## B7. Small Local Model Challenge
 
-## B7. Small Local Model Challenge (bonus)
+Không thực hiện bonus local model; không có số liệu Ollama để báo cáo.
 
-Only fill if your team did the local model challenge.
+## Kiểm tra trước khi nộp
 
-| Version | Model (provider) | Prompt/Tools | case_accuracy | tool_routing | argument | multiturn | Run File |
-|---|---|---|---|---|---|---|---|
-| v3 | (cloud) | v3 |  |  |  |  |  |
-| v3-... | (ollama) | v3 |  |  |  |  |  |
-| v3-... | (ollama) | v3 |  |  |  |  |  |
-| v4-local |  |  |  |  |  |  |  |
-| v5-local |  |  |  |  |  |  |  |
+- Có code, prompt/tools cuối và snapshots, version log, 10 case, tests, run JSON, transcript, analysis, UI và hướng dẫn.
+- Chưa có danh sách họ tên đầy đủ và URL public. Trưởng nhóm cần bổ sung hai mục này nếu dùng link triển khai để chấm.
+- Không nộp .env, API key, .venv, cache hoặc .git. Gói ZIP được script quét mẫu key và kiểm tra danh sách file.
 
-Lỗi đặc thù của model nhỏ (đếm từ run JSON):
+## B3 bổ sung — Bộ tools mở rộng khi nộp
 
-| Failure Pattern | Count | Example Case | Fix Tried | Helped? |
-|---|---|---|---|---|
-| wrong / hallucinated tool |  |  |  |  |
-| invalid JSON args (`_invalid_json_arguments`) |  |  |  |  |
-| no tool call / answered directly |  |  |  |  |
-| missed `clarify` |  |  |  |  |
-| repeated / unnecessary calls |  |  |  |  |
+Sau commit a8f881e, thêm 4 tool làm thay đổi tools hash. Giữ nguyên dataset, prompt và mọi lần chạy; không chọn riêng kết quả cao.
 
-- Cái gì giúp model nhỏ gọi tool đúng hơn nhất? Bằng chứng?
-- Bản prompt tối ưu cho local chạy trên model cloud thì sao?
-- Khi nào nhóm sẽ chọn model local thay vì cloud cho agent này?
+- base: 20/20 PASS; artifact `v3.4-ui+p41ab063811a5+t68b452aec41f`; `runs/v3.4-ui_B_base_openai_20261110T122038144115.json`.
+- group: 9/10 PASS; artifact `v3.4-ui+p41ab063811a5+t68b452aec41f`; `runs/v3.4-ui_B_group_openai_20261110T122021056394.json`.
+  - G08_correct_limit: search_type: expected 'Latest', got None.
+
+G08 của bộ tools mở rộng thiếu search_type tường minh; social_search mặc định Latest nên không đồng nhất với sai cách sắp xếp thực tế. Vẫn giữ FAIL theo cách chấm hiện tại. G04/G09 đã PASS. Unit test cuối: **124 passed, 0 failed, 0 skipped**.
+Snapshot bộ mở rộng tại artifacts/versions/v3.4-ui/. UI hiện dùng bộ mở rộng; không gắn nhãn/hashes của snapshot cũ cho bộ này.

@@ -1,5 +1,16 @@
 # Phần việc của B — phân tích baseline và eval nhóm
 
+## Bản bàn giao khi chuẩn bị nộp
+
+Đọc REPORT.md để xem trạng thái cuối; các mục phía dưới giữ làm lịch sử làm bài.
+- Đủ 10 case, dữ liệu giữ nguyên giữa v2 và các bản v3.
+- Snapshot v3.4 của B: 10/10 PASS. Sau khi tích hợp 4 tool cùng UI, bản v3.4-ui: base 20/20, group 9/10; G08 thiếu search_type=Latest tường minh (runtime có default Latest), G04/G09 vẫn PASS.
+- Bộ tools mở rộng có snapshot riêng artifacts/versions/v3.4-ui; không đồng nhất điểm/hash với snapshot v3.4.
+- Unit tests cuối: 124 passed, không failed/skipped. Log analysis/submission_pytest.txt.
+- Có transcript 3 lượt gọi model thật được script chạy, ghi rõ scripted_live_verification; không coi là bằng chứng người dùng thao tác UI.
+- ZIP nộp ResearchAgent_Submission.zip ở thư mục gốc, loại trừ .env, .venv và cache.
+- Còn cần trưởng nhóm xác nhận họ tên thành viên và link UI public. UI local tại localhost:8501; live mode của app.py cần RESEARCH_AGENT_ENABLE_LIVE_MODE=true và tắt toggle offline.
+
 ## Cập nhật sau khi kéo v2
 
 Đã fast-forward tới commit 69c5ffd. dedupe đã được khai báo trong tools.yaml, không còn chờ tích hợp. Các ghi chú chờ khai báo bên dưới là lịch sử chuẩn bị.
