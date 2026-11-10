@@ -141,3 +141,39 @@ tools:
           default: "url"
           description: "Use url for duplicate links (default), ignoring www, trailing slashes, fragments and utm_* parameters. Use title only when the user requests title-based deduplication; title matching ignores case, accents and repeated whitespace."
       required: [items, by]
+
+  - name: text_stats
+    description: "Count words, characters and sentences in supplied text. Use only on text already provided by the user."
+    parameters:
+      type: object
+      properties:
+        text: {type: string, description: "Text to analyze"}
+      required: [text]
+
+  - name: wiki_search
+    description: "Search Wikipedia for an encyclopedia topic, person, place or technology."
+    parameters:
+      type: object
+      properties:
+        query: {type: string, description: "Wikipedia search query"}
+        limit: {type: integer, default: 3, description: "Maximum number of results"}
+      required: [query]
+
+  - name: export_report
+    description: "Save a research report locally as Markdown or JSON."
+    parameters:
+      type: object
+      properties:
+        filename: {type: string, description: "Output filename"}
+        content: {type: string, description: "Report contents"}
+        format_type: {type: string, enum: [markdown, json], default: "markdown"}
+      required: [filename, content]
+
+  - name: data_calc
+    description: "Calculate summary, mean, sum, min, max or percentage change from numeric research data."
+    parameters:
+      type: object
+      properties:
+        numbers: {type: array, items: {type: number}, description: "Numeric values"}
+        operation: {type: string, enum: [summary, mean, sum, min, max, change], default: "summary"}
+      required: [numbers]

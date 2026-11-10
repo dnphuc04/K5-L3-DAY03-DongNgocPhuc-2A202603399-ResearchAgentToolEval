@@ -18,6 +18,10 @@ from .social_search.tool import search_tweets
 from .send.tool import send_telegram
 from .dedupe.tool import dedupe_items
 from .lookup.tool import web_search
+from .text_stats.tool import analyze_text_stats
+from .wiki_search.tool import search_wikipedia
+from .export_report.tool import export_research_report
+from .data_calc.tool import calculate_metrics
 
 
 # NOTE (starter_v0): tool names here are intentionally vague. These keys are the
@@ -39,6 +43,10 @@ TOOL_FUNCTIONS = {
     "dedupe": dedupe_items,
     # TODO(student): register your new tool here, e.g. "my_tool": my_tool_function,
     # then declare it in artifacts/tools.yaml and run `pytest tests/test_tool_contract.py`.
+    "text_stats": analyze_text_stats,
+    "wiki_search": search_wikipedia,
+    "export_report": export_research_report,
+    "data_calc": calculate_metrics,
 }
 
 
