@@ -14,3 +14,5 @@ Transcript tự lưu vào transcripts/. Nhãn version chỉ là nhãn: prompt/to
 UI app.py có nút tải JSON, lưu từng bước gọi model/tool kể cả khi lỗi, snapshot prompt/tools và thời gian UTC+7; key được che trước khi ghi log. Telegram bị chặn gửi trong demo. Mở cuộc trò chuyện mới vẫn giữ file log của phiên cũ.
 Sau khi pull code mới, dừng hẳn Streamlit bằng Ctrl+C rồi chạy lại lệnh trên để tránh module/session cũ còn trong bộ nhớ (ví dụ lỗi unexpected keyword argument provider_name).
 Chưa có link public; localhost chỉ dùng trên máy chạy server.
+
+Sidebar có mục **Phiên bản demo**: chọn bản hiện tại hoặc snapshot trong artifacts/versions/. Cả system_prompt.md và tools.yaml được nạp từ cùng snapshot, transcript ghi version, hash, đường dẫn và nội dung thực tế. Đổi phiên bản mở cuộc trò chuyện mới và giữ file log cũ. Implementation tool và bộ chạy UI dùng chung; Telegram vẫn bị tắt ở mọi phiên bản. Chế độ offline không dùng model nên không đo sự khác biệt routing giữa các prompt.

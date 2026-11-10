@@ -4,7 +4,7 @@ import shutil
 
 import pytest
 
-from demo_runtime import DemoSession
+from demo_runtime import DemoSession, artifact_options
 from providers.base import ModelResponse, ToolCall
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -88,3 +88,47 @@ def test_clarification_skips_simultaneous_other_calls(demo_root):
     assert result['status'] == 'waiting_for_user'
     assert [e['tool'] for e in result['tool_events']] == ['clarify']
     assert result['rounds'][0]['skipped_calls'][0]['name'] == 'send'
+
+
+def test_snapshot_loads_matching_prompt_tools_and_hashes(demo_root):
+    from versioning import build_artifact_version
+    folder = demo_root / 'artifacts/versions/v0'
+    folder.mkdir(parents=True)
+    (folder / 'system_prompt.md').write_text('Historical prompt', encoding='utf-8')
+    (folder / 'tools.yaml').write_text('tools: []\n', encoding='utf-8')
+    options = artifact_options(demo_root)
+    prompt, tools = options['v0']
+    demo = DemoSession(demo_root, provider=FakeProvider(ModelResponse(text='OK')),
+                       version='v0', prompt_path=prompt, tools_path=tools)
+    demo.ask('Test snapshot')
+    assert demo.prompt == 'Historical prompt'
+    assert demo.tools == []
+    expected = build_artifact_version('v0', prompt, tools)
+    saved = json.loads(demo.path.read_text(encoding='utf-8'))
+    assert saved['artifact_version'] == expected.artifact_version
+    assert saved['tools'] == 'artifacts/versions/v0/tools.yaml'
+    assert saved['artifact_snapshot']['system_prompt'] == 'Historical prompt'
+    assert saved['turns'][0]['rounds'][0]['request_messages'][0]['content'].startswith('Historical prompt')
+
+
+def test_tool_not_declared_in_selected_snapshot_is_not_executed(demo_root, monkeypatch):
+    import demo_runtime
+    folder = demo_root / 'artifacts/versions/old'
+    folder.mkdir(parents=True)
+    shutil.copyfile(demo_root / 'artifacts/system_prompt.md', folder / 'system_prompt.md')
+    (folder / 'tools.yaml').write_text('tools: []\n', encoding='utf-8')
+    def forbidden(call):
+        raise AssertionError('Tool outside selected snapshot must not execute')
+    monkeypatch.setattr(demo_runtime, 'execute_tool_call', forbidden)
+    demo = DemoSession(demo_root, provider=FakeProvider(
+        ModelResponse(tool_calls=[ToolCall('dedupe', {'items': [], 'by': 'url'})]),
+        ModelResponse(text='Tool unavailable')), version='old',
+        prompt_path=folder / 'system_prompt.md', tools_path=folder / 'tools.yaml')
+    assert demo.ask('Deduplicate')['tool_events'][0]['result']['error'] == 'undeclared_tool'
+
+
+def test_incomplete_snapshot_not_listed(demo_root):
+    folder = demo_root / 'artifacts/versions/unfinished'
+    folder.mkdir(parents=True)
+    (folder / 'system_prompt.md').write_text('Only prompt', encoding='utf-8')
+    assert 'unfinished' not in artifact_options(demo_root)

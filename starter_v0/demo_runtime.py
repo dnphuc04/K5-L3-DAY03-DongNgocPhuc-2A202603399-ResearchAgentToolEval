@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -25,6 +26,22 @@ DEMO_POLICY = (
 
 def now() -> str:
     return datetime.now(LOCAL_TZ).isoformat(timespec="seconds")
+
+
+def artifact_options(root: Path) -> dict[str, tuple[Path, Path]]:
+    """Only expose complete on-disk snapshots; never combine different versions."""
+    artifacts = root.resolve() / "artifacts"
+    options = {"current": (artifacts / "system_prompt.md", artifacts / "tools.yaml")}
+    versions = artifacts / "versions"
+    if versions.exists():
+        folders = sorted(versions.iterdir(), key=lambda p: [
+            (0, int(part)) if part.isdigit() else (1, part)
+            for part in re.split(r"(\d+)", p.name)])
+        for folder in folders:
+            pair = (folder / "system_prompt.md", folder / "tools.yaml")
+            if folder.is_dir() and all(p.is_file() for p in pair):
+                options[folder.name] = pair
+    return options
 
 
 def redact(value: Any) -> Any:
@@ -50,16 +67,18 @@ class DemoSession:
     def __init__(self, root: Path, *, provider: Any, model: str | None = None,
                  version: str = "v3.4", max_rounds: int = 5,
                  on_progress: Callable[[str], None] | None = None,
-                 provider_name: str = "openai"):
+                 provider_name: str = "openai", prompt_path: Path | None = None,
+                 tools_path: Path | None = None):
         self.root = root.resolve()
         self.provider = provider
         self.model = model or getattr(provider, "default_model", "gpt-4o-mini")
         self.max_rounds = max_rounds
         self.on_progress = on_progress or (lambda _: None)
-        prompt_path = self.root / "artifacts/system_prompt.md"
-        tools_path = self.root / "artifacts/tools.yaml"
+        prompt_path = (prompt_path or self.root / "artifacts/system_prompt.md").resolve()
+        tools_path = (tools_path or self.root / "artifacts/tools.yaml").resolve()
         self.prompt = prompt_path.read_text(encoding="utf-8-sig")
         self.tools = to_openai_tools(load_tool_declarations(tools_path))
+        self.allowed_tools = {tool["function"]["name"] for tool in self.tools}
         session_id = f"{version}_ui_{datetime.now(LOCAL_TZ):%Y%m%dT%H%M%S}_{uuid4().hex[:10]}"
         self.path = self.root / "transcripts" / f"{session_id}.transcript.json"
         self.history: list[dict[str, str]] = []
@@ -70,6 +89,8 @@ class DemoSession:
             "timezone": "Asia/Bangkok", "max_tool_rounds": max_rounds,
             "delivery_enabled": False,
             "runtime_policy": DEMO_POLICY,
+            "system_prompt": prompt_path.relative_to(self.root).as_posix(),
+            "tools": tools_path.relative_to(self.root).as_posix(),
             "artifact_snapshot": {"system_prompt": self.prompt,
                                   "tools": load_tool_declarations(tools_path)},
             "turns": [],
@@ -127,7 +148,10 @@ class DemoSession:
                 for call in calls:
                     self.on_progress(f"Đang gọi {call.name} · vòng {index}")
                     signature = json.dumps([call.name, call.args], sort_keys=True, default=str)
-                    if call.name == "send":
+                    if call.name not in self.allowed_tools:
+                        event = {"tool": call.name, "args": call.args, "result": {
+                            "error": "undeclared_tool", "message": "Tool not available in the selected snapshot."}}
+                    elif call.name == "send":
                         event = {"tool": call.name, "args": call.args, "result": {
                             "error": "delivery_disabled", "message": "Demo không gửi Telegram."}}
                     elif signature in seen:

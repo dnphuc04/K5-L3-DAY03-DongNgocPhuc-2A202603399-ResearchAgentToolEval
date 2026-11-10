@@ -10,7 +10,7 @@ from typing import Any
 
 import streamlit as st
 
-from demo_runtime import DemoSession, now, redact
+from demo_runtime import DemoSession, artifact_options, now, redact
 from env_loader import load_lab_env
 from providers import make_provider
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
@@ -26,6 +26,23 @@ LIVE_MODE_ALLOWED = os.getenv("RESEARCH_AGENT_ENABLE_LIVE_MODE", "true" if os.ge
 
 PROMPT_PATH = ARTIFACTS_DIR / "system_prompt.md"
 TOOLS_PATH = ARTIFACTS_DIR / "tools.yaml"
+TOOL_SUMMARIES = {
+    "clarify": "Hỏi lại khi thiếu thông tin hoặc cần người dùng xác nhận.",
+    "timeline": "Lấy các bài đăng gần đây của một tài khoản Twitter/X.",
+    "social_search": "Tìm bài đăng Twitter/X theo chủ đề, ưu tiên mới nhất hoặc nổi bật.",
+    "lookup": "Tìm thông tin và tin tức trên web theo chủ đề, khoảng thời gian.",
+    "fetch": "Đọc nội dung từ một URL cụ thể để nghiên cứu hoặc tóm tắt.",
+    "format": "Trình bày dữ liệu đã thu thập thành bản tin, danh sách hoặc chuỗi bài.",
+    "send": "Gửi nội dung đã xác nhận lên Telegram. Đang tắt gửi trong demo.",
+    "policy": "Tra cứu quy định trong kho tài liệu nội bộ của bài lab.",
+    "papers": "Tìm bài báo khoa học trên arXiv theo từ khóa.",
+    "paper_text": "Tải và trích xuất văn bản từ PDF của một bài báo arXiv.",
+    "dedupe": "Loại mục trùng theo URL hoặc tiêu đề, giữ mục xuất hiện đầu tiên.",
+    "text_stats": "Đếm từ, ký tự, câu và ước tính thời gian đọc văn bản.",
+    "wiki_search": "Tìm thông tin bách khoa trên Wikipedia.",
+    "export_report": "Lưu báo cáo nghiên cứu trên máy dưới dạng Markdown hoặc JSON.",
+    "data_calc": "Tính tổng, trung bình, min/max và phần trăm thay đổi của dữ liệu số.",
+}
 st.set_page_config(page_title="Research Agent", page_icon="🔎", layout="wide")
 
 st.markdown(
@@ -67,7 +84,7 @@ def save_transcript(turns: list[dict[str, Any]], mode: str, provider: str, model
         demo.save()
         st.session_state["active_transcript_path"] = str(demo.path)
         return demo.path
-    version = build_artifact_version("v3.4-ui-C", PROMPT_PATH, TOOLS_PATH)
+    version = build_artifact_version(selected_version, PROMPT_PATH, TOOLS_PATH)
     transcript = {
         "transcript_id": f"ui_{st.session_state['session_id']}",
         **artifact_version_dict(version),
@@ -131,6 +148,8 @@ def run_offline_demo(query: str) -> tuple[str, list[dict[str, Any]]]:
             text = "Trí tuệ nhân tạo giúp nhóm nghiên cứu phân tích dữ liệu và kiểm tra nguồn thông tin."
         tool, args = "text_stats", {"text": text}
 
+    if tool not in {item["name"] for item in declarations}:
+        return f"Tool `{tool}` không có trong phiên bản **{selected_version}**. Chọn bản hiện tại hoặc dùng live để thử các tool của phiên bản này.", []
     result = TOOL_FUNCTIONS[tool](**args)
     event = {"tool": tool, "args": args, "result": result}
     return result_text(tool, result), [{"round": 1, "assistant_text": None, "tool_calls": [{"name": tool, "args": args}], "tool_results": [event]}]
@@ -146,7 +165,8 @@ def run_live_turn(
     if "live_demo" not in st.session_state:
         st.session_state["live_demo"] = DemoSession(
             ROOT, provider=make_provider(provider_name), provider_name=provider_name,
-            model=model, version="v3.4-ui-C", max_rounds=max_tool_rounds,
+            model=model, version=selected_version, max_rounds=max_tool_rounds,
+            prompt_path=PROMPT_PATH, tools_path=TOOLS_PATH,
         )
     return st.session_state["live_demo"].ask(query)
 
@@ -156,11 +176,18 @@ def tool_events(turn: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 init_session()
-artifacts = build_artifact_version("v3.4-ui-C", PROMPT_PATH, TOOLS_PATH)
-declarations = load_tool_declarations(TOOLS_PATH)
 
 with st.sidebar:
     st.markdown("### ⚙️ Cài đặt")
+    versions = artifact_options(ROOT)
+    selected_version = st.selectbox(
+        "Phiên bản demo", list(versions), key="selected_version",
+        format_func=lambda name: "Hiện tại — artifacts/" if name == "current" else name,
+        help="Nạp cả prompt và tools của snapshot. Đổi phiên bản sẽ mở phiên chat mới và giữ log cũ.",
+    )
+    PROMPT_PATH, TOOLS_PATH = versions[selected_version]
+    artifacts = build_artifact_version(selected_version, PROMPT_PATH, TOOLS_PATH)
+    declarations = load_tool_declarations(TOOLS_PATH)
     offline = st.toggle(
         "Demo offline (không cần API key)",
         value=not LIVE_MODE_ALLOWED,
@@ -189,7 +216,8 @@ with st.sidebar:
         st.caption("Only key names are shown here. Restart Streamlit after editing .env.")
     with st.expander("Danh sách tool"):
         for item in declarations:
-            st.markdown(f"- `{item['name']}`")
+            st.markdown(f"**`{item['name']}`**")
+            st.caption(TOOL_SUMMARIES.get(item["name"], item.get("description", "")))
     st.caption("Telegram: tắt gửi trong demo. Transcript tự lưu; key không hiển thị.")
     if st.button("Cuộc trò chuyện mới (giữ log cũ)", use_container_width=True):
         st.session_state["turns"] = []
@@ -199,13 +227,14 @@ with st.sidebar:
         st.session_state.pop("active_transcript_path", None)
         st.rerun()
 
-settings = (offline, provider_name, model, max_rounds)
+settings = (offline, provider_name, model, max_rounds, artifacts.artifact_version)
 if st.session_state.get("active_settings", settings) != settings:
     st.session_state["turns"] = []
     st.session_state["session_id"] = uuid.uuid4().hex[:10]
     st.session_state["created_at"] = now_iso()
     st.session_state.pop("live_demo", None)
     st.session_state.pop("active_transcript_path", None)
+    st.session_state["pending_input"] = ""
 st.session_state["active_settings"] = settings
 
 st.markdown(
@@ -214,9 +243,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 if offline:
-    st.info("Đang ở chế độ demo offline: yêu cầu mẫu chạy trực tiếp tool cục bộ, không dùng model và không truy cập mạng.")
+    st.info("Demo offline: chạy tool cục bộ của phiên bản đã chọn; không dùng model, không đo khả năng routing của prompt.")
 else:
-    st.caption(f"Live · **{provider_name}** · prompt v3.4 + tools của C · log từng bước, tự động che key.")
+    st.caption(f"Live · **{provider_name}** · phiên bản **{selected_version}** · {len(declarations)} tool · log từng bước, tự động che key.")
 
 st.markdown("#### Thử nhanh")
 sample_cols = st.columns(3)
