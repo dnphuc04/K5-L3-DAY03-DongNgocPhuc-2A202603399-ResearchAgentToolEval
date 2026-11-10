@@ -4,7 +4,14 @@
 
 - Repo: dnphuc04/K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval.
 - Phân công: Phúc tối ưu prompt/tools và version log; A viết dedupe và unit test; B phân tích lỗi, 10 case nhóm và bằng chứng; UI Streamlit đã bổ sung tại app.py.
-- Danh sách họ tên đầy đủ của A/B/C: cần trưởng nhóm bổ sung trước khi nộp; không suy đoán từ tên thư mục máy.
+- Thành viên tự bổ sung thông tin vào bảng dưới đây.
+
+| Vai trò | Họ và tên | Mã sinh viên |
+|---|---|---|
+| B — phân tích lỗi và eval nhóm | Nguyễn Vũ Hoàng | 2A202603491 |
+| Lead — Phúc | Chưa điền | Chưa điền |
+| A — tool mới | Chưa điền | Chưa điền |
+| C — UI và demo | Chưa điền | Chưa điền |
 - Provider/model: OpenAI / gpt-4o-mini. Snapshot đo chuẩn: `v3.4+p41ab063811a5+t3b41d41b278e`; xem kết quả bộ tools mở rộng cuối tại mục B3 bổ sung.
 
 # PHẦN A — Giới thiệu agent
@@ -69,6 +76,7 @@ Baseline chính của nhóm là 65%; B có một lần chạy khác cùng artifa
 
 
 
+
 Phân tích bởi B, nguồn: `runs/v0_B_base_openai_20261110T103030701042.json`.
 Provider/model: OpenAI / gpt-4o-mini. Artifact: `v0+peb1c8179815b+t5b22a2476d41`.
 Baseline: 15/20 case pass (75%), routing 80%, arguments 75%, multi turn 100%, provider errors 0.
@@ -83,6 +91,7 @@ Baseline: 15/20 case pass (75%), routing 80%, arguments 75%, multi turn 100%, pr
 | R13_parallel_web_and_tweets | Case gắn nhãn wrong_tool; lỗi quan sát là wrong_arg_value | lookup(query=AI news, timeframe=day, max_results=5) và social_search(query=AI, search_type=Latest, limit=5) | Gọi đủ 2 tool; lookup thiếu topic=news, query khác chuỗi AI mà eval yêu cầu | Đề xuất: làm rõ args cho tin tức; ghi nhận query gần nghĩa vẫn fail do bộ chấm so khớp chuỗi |
 
 R08/R12 không thực sự gửi Telegram: tool trả `needs_confirmation`. R10/R11/R13 có lỗi tool do thiếu RAPIDAPI_KEY, FIRECRAWL_API_KEY hoặc TAVILY_API_KEY. Không có provider_error không có nghĩa API tool đã hoạt động. Các lỗi setup này cần theo dõi riêng với lỗi chọn tool/args.
+
 
 
 
