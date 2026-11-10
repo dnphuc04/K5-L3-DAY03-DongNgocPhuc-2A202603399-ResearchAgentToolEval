@@ -1,0 +1,49 @@
+[
+  {
+    "case_id": "G01_handle_without_at",
+    "auto_pass": true
+  },
+  {
+    "case_id": "G02_news_week",
+    "auto_pass": true,
+    "query_keeps_robotics": true
+  },
+  {
+    "case_id": "G03_top_social",
+    "auto_pass": true,
+    "query_keeps_robotics": true
+  },
+  {
+    "case_id": "G04_missing_link",
+    "auto_pass": true,
+    "clarification_question": "Bạn có thể cung cấp đường link hoặc nội dung của bài báo mà bạn muốn tóm tắt không?"
+  },
+  {
+    "case_id": "G05_dedupe_existing_items",
+    "auto_pass": true,
+    "exact_items_and_output_correct": true
+  },
+  {
+    "case_id": "G06_fill_handle",
+    "auto_pass": true
+  },
+  {
+    "case_id": "G07_correct_handle",
+    "auto_pass": true
+  },
+  {
+    "case_id": "G08_correct_limit",
+    "auto_pass": true,
+    "query_keeps_robotics": true
+  },
+  {
+    "case_id": "G09_change_timeframe",
+    "auto_pass": true,
+    "query_keeps_robotics": true
+  },
+  {
+    "case_id": "G10_switch_source",
+    "auto_pass": false,
+    "query_keeps_robotics": true
+  }
+]

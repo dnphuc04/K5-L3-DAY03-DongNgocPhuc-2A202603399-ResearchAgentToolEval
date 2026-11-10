@@ -1,0 +1,929 @@
+{
+  "run_id": "v3.4_B_group_openai_20261110T113624190425",
+  "version": "v3.4",
+  "artifact_version": "v3.4+pb7e09957c879+t3b41d41b278e",
+  "prompt_hash": "b7e09957c8790e1d6943b70969655f131e12f32f50dccd039b4b42359682797a",
+  "tools_hash": "3b41d41b278e3d1257e21b4da70f3fe39f154bea596b1f86aa649ef851636343",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day04_v2_research_group",
+  "dataset_role": "group",
+  "description": "10 case nhóm: 5 single turn và 5 multi turn; G05 kiểm tra routing và arguments của tool mới dedupe. Cần tích hợp khai báo dedupe trước khi chạy suite.",
+  "generated_at": "2026-11-10T11:36:24",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 10,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "G01_handle_without_at",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Bỏ @ khỏi handle và giữ đúng limit=3."
+      },
+      "input": "Lấy 3 tweet mới nhất của tài khoản @NASA.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "NASA",
+            "limit": 3
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "NASA",
+            "items": [
+              {
+                "title": "We had a great time at MAX POWER — and made a lot of news!",
+                "summary": "We had a great time at MAX POWER — and made a lot of news!\n\nWe're recruiting a new class of astronauts, making major advancements on the Moon Base, and challenging students to a $1 million design competition. Catch up with everything we announced at the festival: https://t.co/GrfsD9eADy",
+                "url": "https://x.com/NASA/status/2119846862286930036",
+                "source": "@NASA",
+                "date": "Mon Nov 09 17:37:31 +0000 2026",
+                "metrics": {
+                  "favorites": 1107,
+                  "retweets": 142,
+                  "views": "323273"
+                }
+              },
+              {
+                "title": "The weekend ends. The mission keeps going.",
+                "summary": "The weekend ends. The mission keeps going.\n\nThis is what American ambition looks like. 🇺🇸🚀 https://t.co/C5d5Z0imPm",
+                "url": "https://x.com/NASA/status/2119833829389041896",
+                "source": "@NASA",
+                "date": "Mon Nov 09 16:45:44 +0000 2026",
+                "metrics": {
+                  "favorites": 1839,
+                  "retweets": 275,
+                  "views": "635457"
+                }
+              },
+              {
+                "title": "RT @WhiteHouse: Under the Trump Administration, ambition is back. Momentum is back. Leadership is back. @NASA is BACK. 🚀",
+                "summary": "RT @WhiteHouse: Under the Trump Administration, ambition is back. Momentum is back. Leadership is back. @NASA is BACK. 🚀🇺🇸 https://t.co/6FK…",
+                "url": "https://x.com/NASA/status/2119813183628284317",
+                "source": "@NASA",
+                "date": "Mon Nov 09 15:23:41 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1639,
+                  "views": "49151"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_news_week",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Tin web phải dùng lookup, topic=news, timeframe=week, max_results=4. Không ép cách viết query."
+      },
+      "input": "Tìm 4 tin tức trên web về robotics trong tuần này.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week",
+              "max_results": 4
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "week",
+              "max_results": 4
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "week",
+            "max_results": 4
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "week",
+            "items": [
+              {
+                "title": "Serve Robotics launches new business to become the AWS for robots | TechCrunch",
+                "url": "https://techcrunch.com/2026/11/05/serve-robotics-launches-new-business-to-become-the-aws-for-robots",
+                "source": "techcrunch.com",
+                "summary": "Serve Robotics, a maker of self-driving sidewalk delivery robots, is expanding beyond its autonomous delivery operations in a bid to become a technology supplier to other companies building robots.\n\nThe company, which spun out of Uber’s acquisition of Postmates in 2021 and went public in 2024, said Thursday it will launch a new business line called Physical AI Services. [...] Specifically, Serve Robotics will offer customers its connectivity and data tools. Bedrock Robotics, a startup developing self-driving systems for construction equipment, is a customer, according to Serve. It’s also working with T-Mobile to bring AI computing power closer to robots, Serve announced alongside its third-quarter earnings on Thursday.\n\n“We are solving the problem of robots in human spaces,” Serve Robotics CEO and co-founder Ai Kashani told TechCrunch. [...] Serve Robotics already makes two kinds of robots, the cute googly-eyed sidewalk delivery robot and one designed for hospitals that it got through its acquisition of Diligent Robotics.\n\nThose businesses are not going away, Kashani emphasized in a recent interview. Instead, he said there is opportunity to sell the technology it developed for its own robots to other companies developing robots for farms, warehouses, and other uncontrolled environments.",
+                "score": 0.63723457
+              },
+              {
+                "title": "Top Robotics Stocks With Strong Potential for Long-Term Growth",
+                "url": "https://finance.yahoo.com/markets/stocks/articles/top-robotics-stocks-strong-potential-153300390.html",
+                "source": "finance.yahoo.com",
+                "summary": "Robotics posted its best third-quarter revenues on record and turned profitable, reinforcing management's view of multiple growth engines heading into 2027. Fourth-quarter guidance points to continued demand across the AI value chain, from memory and interconnect test to robotics deployments. With an expanding, AI-ready robotics platform now generating profitable revenues, this Zacks Rank #1 company's near-term fundamental trajectory looks constructive. [...] Robotic Vehicle continues toward geosynchronous orbit, and Orbital Robotics is preparing robotic arms for NASA's Astrobee free-flyers aboard the International Space Station. Quantum-robotics fusion remains early, though Q-CTRL moved its GPS-free quantum magnetic navigation trials from aircraft to maritime platforms in the Pacific in October. [...] The Robotics Screen makes it easy to identify high-potential stocks at any given time, just like the ones discussed below. Leveraging advanced tools, the thematic screens identify companies shaping the future, making it easier to capitalize on emerging trends.  \n  \nReady to uncover more transformative thematic investment ideas? Explore 30 cutting-edge investment themes with Zacks Thematic Screens and discover your next big opportunity.",
+                "score": 0.5760895
+              },
+              {
+                "title": "Recent advances in AI are creating a 'paradigm shift' for robotics - Berkeley News",
+                "url": "https://news.berkeley.edu/2026/11/09/recent-advances-in-ai-are-creating-a-paradigm-shift-for-robotics",
+                "source": "news.berkeley.edu",
+                "summary": "Traditionally, engineers can directly program the software that tells robots how to perceive objects, plan movements and control their actions, a process called model-based robotics. Or, with model-free robotics, they can train robots to learn behaviors from demonstrations through imitation learning. The first approach requires extensive engineering, while the second needs enormous amounts of data and time. [...] Berkeley-based Ambi Robotics, which specializes in logistics and warehouse order fulfillment, applied the new methods earlier this year to analyze parcel sorting data and test updates to robot behavior. Tests showed an increased capacity of over 15,000 packages sorted annually per robot; the change is now deployed across 30% of the company’s U.S. fleet. [...] Ken Goldberg\n\n“Agentic robotics is a fundamental shift in how robots are controlled,” Goldberg said. “Instead of collecting massive amounts of data and hand-tuning every behavior, teams of agents can quickly generate, test and refine robot programs that allow human engineers to interpret how the programs work for fine-tuning and verification.”",
+                "score": 0.52057004
+              },
+              {
+                "title": "Inside App State’s Robotics Lab: Students explore the future of human–robot collaboration | Appalachian Today",
+                "url": "https://today.appstate.edu/2026/11/04/robotics",
+                "source": "today.appstate.edu",
+                "summary": "The Robotics Lab at Appalachian State University is dedicated to fostering innovative research, hands‑on learning, and interdisciplinary collaboration. Our mission is to develop intelligent robotic systems that improve lives and address real‑world challenges by integrating artificial intelligence, machine learning, and human‑robot interaction.\n\nLearn more\n\nDepartment of Computer Science [...] The Robotics Lab at Appalachian State University is dedicated to fostering innovative research, hands‑on learning, and interdisciplinary collaboration. Our mission is to develop intelligent robotic systems that improve lives and address real‑world challenges by integrating artificial intelligence, machine learning, and human‑robot interaction.\n\nLearn more\n\nDepartment of Computer Science [...] Madadi has developed three courses in the Department of Computer Science to further strengthen robotics education at App State: Introduction to Robotics, Robot Modeling and Control, and Machine Learning in Robotics. These courses provide students with foundational and advanced knowledge in robotic systems, motion modeling, control algorithms and machine learning applications, connecting classroom instruction with hands-on research opportunities in the Robotics Lab.",
+                "score": 0.46526662
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_top_social",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Tìm theo chủ đề dùng social_search; phổ biến dùng Top thay vì Latest."
+      },
+      "input": "Tìm 2 tweet nổi bật nhất về robotics, ưu tiên phổ biến chứ không phải mới nhất.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "robotics",
+              "search_type": "Top",
+              "limit": 2
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "robotics",
+            "search_type": "Top",
+            "limit": 2
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "robotics",
+            "search_type": "Top",
+            "items": [
+              {
+                "title": "SHE NEEDS A FAN TO STAY COOL. THAT'S THE MOST REALISTIC PART OF THIS VIDEO. 🤖🌀",
+                "summary": "SHE NEEDS A FAN TO STAY COOL. THAT'S THE MOST REALISTIC PART OF THIS VIDEO. 🤖🌀\n\na robot expo. a crowd of phones. \na girl with a glowing metal core where her waist should be. ✨\nsomeone holds a little fan to it. she smiles, fixes her hair. \n\nthe face? almost certainly AI. \nthe fan? that's real robotics. 🔥\nevery motor, every battery, every AI chip makes heat. 🌡️\nheat is one of the reasons real humanoids still work in short shifts and spend hours on chargers. \n\nso how far have robots actually come? 👇\n\n📅 2015: at the DARPA challenge, robots fell over opening doors.\n🤸 2025: humanoids do flips, box, and dance at expos.\n📦 2025: Unitree shipped 5,500+ humanoids. AgiBot's CEO said 5,000+.\n🇺🇸 Tesla, Figure and Agility: about 150 each (Omdia).\n🏭 Hyundai plans a factory for 30,000 robots a year by 2028.\n\n💰 Morgan Stanley: a $5 trillion humanoid market by 2050.\nten years from falling over to doing backflips. \nbut the robots that exist are still grey, bulky and plugged in. 🔌\n\nthe \"robot girl\" is what the hype looks like.\nthe fan is what the engineering looks like. 🛠️\nwhen the real ones catch up with this video, will you be able to tell the difference? 👀",
+                "url": "https://x.com/zeroxX_o/status/2117673055778455826",
+                "source": "@zeroxX_o",
+                "date": "Tue Nov 03 17:39:35 +0000 2026",
+                "metrics": {
+                  "favorites": 54,
+                  "retweets": 8,
+                  "views": "5321"
+                }
+              },
+              {
+                "title": "A humanoid robot appears in a public place, playing with a child and attracting attention with its movements and interac",
+                "summary": "A humanoid robot appears in a public place, playing with a child and attracting attention with its movements and interactions.\n\nShort public demonstrations may look impressive on camera. However, the practical test remains how long the platform can operate autonomously, without a person nearby to adjust or restart it.\n\nThese videos demonstrate progress in movement and presence. It is the number of hours of reliable autonomous operation on real-world tasks that determines the device’s usefulness.\n\n#AI #Robotics #HumanoidRobots #PhysicalAI #Automation #CuttingEdgeTechnology",
+                "url": "https://x.com/GhostGeta777/status/2118794615373357301",
+                "source": "@GhostGeta777",
+                "date": "Fri Nov 06 19:56:16 +0000 2026",
+                "metrics": {
+                  "favorites": 57,
+                  "retweets": 10,
+                  "views": "6581"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_missing_link",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Thiếu URL/nội dung phải hỏi lại, không tự tạo URL. Kiểm tra thủ công câu hỏi có xin URL không."
+      },
+      "input": "Hãy đọc và tóm tắt bài báo mình nhắc đến; mình chưa gửi đường link hay nội dung.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có thể cung cấp đường link hoặc nội dung của bài báo mà bạn muốn tóm tắt không?",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có thể cung cấp đường link hoặc nội dung của bài báo mà bạn muốn tóm tắt không?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có thể cung cấp đường link hoặc nội dung của bài báo mà bạn muốn tóm tắt không?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G05_dedupe_existing_items",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Danh s?ch ?? c?, y?u c?u b? tr?ng URL: ch? g?i dedupe(by=url), kh?ng lookup/fetch/format. Ki?m tra th? c?ng actual_tool_calls.args.items ph?i l? nguy?n 3 m?c trong query, ??ng th? t?; tool_results ph?i c? item_count=2, removed=1 v? gi? Tin A, Tin B. Kh?ng ch?m items t? ??ng v? normalize_value hi?n sorted(list_of_dict) g?y TypeError."
+      },
+      "input": "Chỉ loại bỏ các mục trùng URL trong danh sách đã có dưới đây, giữ mục xuất hiện đầu tiên. Không tìm kiếm thêm và chưa định dạng bản tin. Danh sách: [{\"title\":\"Tin A\",\"url\":\"https://www.example.com/post/\"},{\"title\":\"Bản sao A\",\"url\":\"https://example.com/post?utm_source=demo#intro\"},{\"title\":\"Tin B\",\"url\":\"https://example.com/other\"}].",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "by": "url"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "items": [
+                {
+                  "title": "Tin A",
+                  "url": "https://www.example.com/post/"
+                },
+                {
+                  "title": "Bản sao A",
+                  "url": "https://example.com/post?utm_source=demo#intro"
+                },
+                {
+                  "title": "Tin B",
+                  "url": "https://example.com/other"
+                }
+              ],
+              "by": "url"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "dedupe",
+          "args": {
+            "items": [
+              {
+                "title": "Tin A",
+                "url": "https://www.example.com/post/"
+              },
+              {
+                "title": "Bản sao A",
+                "url": "https://example.com/post?utm_source=demo#intro"
+              },
+              {
+                "title": "Tin B",
+                "url": "https://example.com/other"
+              }
+            ],
+            "by": "url"
+          },
+          "result": {
+            "tool": "dedupe",
+            "by": "url",
+            "items": [
+              {
+                "title": "Tin A",
+                "url": "https://www.example.com/post/"
+              },
+              {
+                "title": "Tin B",
+                "url": "https://example.com/other"
+              }
+            ],
+            "item_count": 2,
+            "removed": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "G06_fill_handle",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Kết hợp limit ở lượt đầu với handle vừa được bổ sung; không hỏi lại khi đã đủ thông tin."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Lấy 4 tweet gần nhất giúp mình."
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn muốn lấy tweet của tài khoản nào?"
+        },
+        {
+          "role": "user",
+          "content": "Tài khoản @NASA nhé."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 4
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 4
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "NASA",
+            "limit": 4
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "NASA",
+            "items": [
+              {
+                "title": "We had a great time at MAX POWER — and made a lot of news!",
+                "summary": "We had a great time at MAX POWER — and made a lot of news!\n\nWe're recruiting a new class of astronauts, making major advancements on the Moon Base, and challenging students to a $1 million design competition. Catch up with everything we announced at the festival: https://t.co/GrfsD9eADy",
+                "url": "https://x.com/NASA/status/2119846862286930036",
+                "source": "@NASA",
+                "date": "Mon Nov 09 17:37:31 +0000 2026",
+                "metrics": {
+                  "favorites": 1107,
+                  "retweets": 142,
+                  "views": "323398"
+                }
+              },
+              {
+                "title": "The weekend ends. The mission keeps going.",
+                "summary": "The weekend ends. The mission keeps going.\n\nThis is what American ambition looks like. 🇺🇸🚀 https://t.co/C5d5Z0imPm",
+                "url": "https://x.com/NASA/status/2119833829389041896",
+                "source": "@NASA",
+                "date": "Mon Nov 09 16:45:44 +0000 2026",
+                "metrics": {
+                  "favorites": 1839,
+                  "retweets": 275,
+                  "views": "635457"
+                }
+              },
+              {
+                "title": "RT @WhiteHouse: Under the Trump Administration, ambition is back. Momentum is back. Leadership is back. @NASA is BACK. 🚀",
+                "summary": "RT @WhiteHouse: Under the Trump Administration, ambition is back. Momentum is back. Leadership is back. @NASA is BACK. 🚀🇺🇸 https://t.co/6FK…",
+                "url": "https://x.com/NASA/status/2119813183628284317",
+                "source": "@NASA",
+                "date": "Mon Nov 09 15:23:41 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 1639,
+                  "views": "49151"
+                }
+              },
+              {
+                "title": "Just announced at MAX POWER: a $1 million Moon Base Student Challenge! https://t.co/w2MEiVhdPu",
+                "summary": "Just announced at MAX POWER: a $1 million Moon Base Student Challenge! https://t.co/w2MEiVhdPu\n\nThe competition tasks U.S. high school and post-secondary student teams to develop solutions to real-world engineering constraints for establishing a long-term human presence on the Moon.",
+                "url": "https://x.com/NASA/status/2119467718373941588",
+                "source": "@NASA",
+                "date": "Sun Nov 08 16:30:56 +0000 2026",
+                "metrics": {
+                  "favorites": 3254,
+                  "retweets": 539,
+                  "views": "632874"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_correct_handle",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Dùng handle sửa ở lượt cuối, không gọi thêm timeline cho handle cũ."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Lấy 2 tweet mới nhất của @NASA."
+        },
+        {
+          "role": "user",
+          "content": "Mình nhầm, đổi sang @SpaceX, vẫn lấy 2 tweet."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "SpaceX",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "SpaceX",
+              "limit": 2
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "SpaceX",
+            "limit": 2
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "SpaceX",
+            "items": [
+              {
+                "title": "Starship is preparing for catch",
+                "summary": "Starship is preparing for catch\n \nFlight 15 is targeting to launch as early as Friday, November 13, pending regulatory approval → https://t.co/K5XRci6bnw https://t.co/WS2xGLjVsx",
+                "url": "https://x.com/SpaceX/status/2119093662957060389",
+                "source": "@SpaceX",
+                "date": "Sat Nov 07 15:44:34 +0000 2026",
+                "metrics": {
+                  "favorites": 23763,
+                  "retweets": 3473,
+                  "views": "3103161"
+                }
+              },
+              {
+                "title": "Falcon 9 launches USSF-432 to orbit from pad 4E in California https://t.co/aEMgy2wy1f",
+                "summary": "Falcon 9 launches USSF-432 to orbit from pad 4E in California https://t.co/aEMgy2wy1f",
+                "url": "https://x.com/SpaceX/status/2118953789357281607",
+                "source": "@SpaceX",
+                "date": "Sat Nov 07 06:28:46 +0000 2026",
+                "metrics": {
+                  "favorites": 6115,
+                  "retweets": 655,
+                  "views": "625543"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G08_correct_limit",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Cập nhật limit=2 và giữ Latest; kiểm tra thủ công query vẫn về robotics."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm 6 tweet mới nhất về robotics."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ lấy 2 tweet thôi, chủ đề và cách sắp xếp giữ nguyên."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Latest",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "robotics",
+              "limit": 2,
+              "search_type": "Latest"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "robotics",
+            "limit": 2,
+            "search_type": "Latest"
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "robotics",
+            "search_type": "Latest",
+            "items": [
+              {
+                "title": "6/6",
+                "summary": "6/6\n\nKetika data nyata langka, pemilihan yang cermat mendorong nilai data sim lebih dari volume mentah. Utilitas berbasis pengaruh dan cakupan menawarkan cara tertutup untuk memilih demo yang benar-benar transferable ke robot nyata.\n\nProject page: https://t.co/xfBSLTNx2A\nPaper: https://t.co/NLPZ3fuSYW\nCode: https://t.co/whmPrlEKKh",
+                "url": "https://x.com/AxisRoboticsID/status/2120012603233833272",
+                "source": "@AxisRoboticsID",
+                "date": "Tue Nov 10 04:36:07 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "1"
+                }
+              },
+              {
+                "title": "5/6 Eksperimen Simulasi  ",
+                "summary": "5/6 Eksperimen Simulasi  \n\nKami memvalidasi kriteria tersebut dalam dua pengaturan simulasi dengan protokol yang sama, dirata-ratakan dari tiga seed.  \n\nSingle-simulator (RoboMimic). Sumber dan target berbagi satu simulator, yang mengisolasi kriteria kurasi dari kesenjangan domain apa pun. Pada Lift, Square, dan Transport, TUCO adalah yang terbaik atau seri-terbaik dalam 18 dari 25 pengaturan tugas-anggaran, dan menyamai pelatihan all-data pada Lift hanya dengan menggunakan 25% dari data.  \n\nSim-to-sim (IsaacSim ke MuJoCo). Demo dihasilkan dalam satu simulator dan dievaluasi dalam simulator lain, sebuah pengganti terkendali untuk kesenjangan sim-to-real. TUCO adalah yang terbaik dalam 15 dari 18 pengaturan dan di atas seleksi acak dalam semua 18. Pool IsaacSim lengkap bahkan merugikan CupCake, sementara subset yang dikurasi memberikan hasil terbaik pada setiap tugas.",
+                "url": "https://x.com/AxisRoboticsID/status/2120012598410465772",
+                "source": "@AxisRoboticsID",
+                "date": "Tue Nov 10 04:36:06 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "1"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_change_timeframe",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Đổi day sang month, giữ topic=news và số lượng; kiểm tra thủ công query vẫn về robotics."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm 3 tin web về robotics hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Mở rộng sang cả tháng này, vẫn 3 tin và cùng chủ đề."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "month",
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "month",
+              "max_results": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "month",
+            "max_results": 3
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "month",
+            "items": [
+              {
+                "title": "Promise Robotics partners with D.R. Horton on physical AI for homebuilding - The Robot Report",
+                "url": "https://www.therobotreport.com/promise-robotics-partners-d-r-horton-physical-ai-homebuilding",
+                "source": "therobotreport.com",
+                "summary": "Promise Robotics said its technology interprets existing home designs, generates production plans and robotic instructions, orchestrates manufacturing, and connects that production with site installation. Rather than automating isolated tasks, the company said it brings these capabilities together in one integrated environment. [...] Promise Robotics is not a vertically integrated developer or a home designer like Reframe Systems, Attar acknowledged. “We’re more about the advancements in robotics, and we’re here to scale when companies need to scale,” he said. [...] “At D.R. Horton, we are always looking for innovations that can help us improve how we build. We are continuously focused on improving cycle times, increasing production capacity, and bringing greater consistency and predictability to our operations,” said Brad Conlon, senior vice president for strategic growth and innovation at D.R. Horton. “Promise Robotics’ integrated platform gives us a new capability to support those goals.”",
+                "score": 0.5674818
+              },
+              {
+                "title": "Recent advances in AI are creating a 'paradigm shift' for robotics - Berkeley News",
+                "url": "https://news.berkeley.edu/2026/11/09/recent-advances-in-ai-are-creating-a-paradigm-shift-for-robotics",
+                "source": "news.berkeley.edu",
+                "summary": "Traditionally, engineers can directly program the software that tells robots how to perceive objects, plan movements and control their actions, a process called model-based robotics. Or, with model-free robotics, they can train robots to learn behaviors from demonstrations through imitation learning. The first approach requires extensive engineering, while the second needs enormous amounts of data and time. [...] Berkeley-based Ambi Robotics, which specializes in logistics and warehouse order fulfillment, applied the new methods earlier this year to analyze parcel sorting data and test updates to robot behavior. Tests showed an increased capacity of over 15,000 packages sorted annually per robot; the change is now deployed across 30% of the company’s U.S. fleet. [...] Ken Goldberg\n\n“Agentic robotics is a fundamental shift in how robots are controlled,” Goldberg said. “Instead of collecting massive amounts of data and hand-tuning every behavior, teams of agents can quickly generate, test and refine robot programs that allow human engineers to interpret how the programs work for fine-tuning and verification.”",
+                "score": 0.52057004
+              },
+              {
+                "title": "Pitt Athletics and Gecko Robotics Announce Men’s Basketball Jersey Patch Partnership - Pitt Panthers #H2P",
+                "url": "https://pittsburghpanthers.com/news/2026/10/27/general-pitt-athletics-and-gecko-robotics-announce-mens-basketball-jersey-patch-partnership",
+                "source": "pittsburghpanthers.com",
+                "summary": "Gecko Robotics combines advanced robotics and AI-powered software to build, maintain and modernize the world's most critical infrastructure.  \n   \n Using robots that climb, crawl, fly and swim, Gecko is able to collect an unprecedented amount of data on the built world, whether that's with Fortune 100 companies in energy, oil and gas, and manufacturing sectors around the world, or the U.S. Air Force and U.S. Navy to protect and optimize nuclear submarines and aircraft carriers. [...] Founded in 2013 and headquartered in Pittsburgh, Gecko Robotics combines AI and robotics to help build, maintain and modernize critical industries worldwide, including defense, energy, oil and gas and manufacturing. Gecko Robotics brings the city's signature grit to solving some of the world's most complex infrastructure challenges.",
+                "score": 0.4622066
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_switch_source",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Lượt cuối chuyển nguồn sang web; chỉ gọi lookup, không gọi thêm social_search."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm tweet mới nhất về robotics."
+        },
+        {
+          "role": "user",
+          "content": "Thôi không tìm tweet nữa. Chỉ tìm 3 tin tức web về robotics hôm nay."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": 3
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "Recent advances in AI are creating a 'paradigm shift' for robotics - Berkeley News",
+                "url": "https://news.berkeley.edu/2026/11/09/recent-advances-in-ai-are-creating-a-paradigm-shift-for-robotics",
+                "source": "news.berkeley.edu",
+                "summary": "Traditionally, engineers can directly program the software that tells robots how to perceive objects, plan movements and control their actions, a process called model-based robotics. Or, with model-free robotics, they can train robots to learn behaviors from demonstrations through imitation learning. The first approach requires extensive engineering, while the second needs enormous amounts of data and time. [...] Berkeley-based Ambi Robotics, which specializes in logistics and warehouse order fulfillment, applied the new methods earlier this year to analyze parcel sorting data and test updates to robot behavior. Tests showed an increased capacity of over 15,000 packages sorted annually per robot; the change is now deployed across 30% of the company’s U.S. fleet. [...] Ken Goldberg\n\n“Agentic robotics is a fundamental shift in how robots are controlled,” Goldberg said. “Instead of collecting massive amounts of data and hand-tuning every behavior, teams of agents can quickly generate, test and refine robot programs that allow human engineers to interpret how the programs work for fine-tuning and verification.”",
+                "score": 0.52057004
+              },
+              {
+                "title": "Autonomous EV developer Humble Robotics adds $51M to expand - TT",
+                "url": "https://www.ttnews.com/articles/autonomous-ev-humble-51m",
+                "source": "ttnews.com",
+                "summary": "Humble Robotics raised $51 million in Series A financing, bringing its total funding to $75 million less than a year after its founding.\n The company is developing the Humble Hauler, a battery-electric, cabless Class 8 autonomous vehicle for regional freight routes under 250 miles.\n Humble will fund customer pilots, testing, early manufacturing and expansion into vehicles for 40-foot containers and 53-foot dry van and refrigerated trailers. [...] Stay on top of transportation news: [Get TTNews in your inbox.]\n\nHumble Robotics secured $51 million in new financing, bringing the autonomous electric vehicle developer’s total funding to $75 million less than a year after its founding. [...] The Hauler uses vision-language-action models and is equipped with cameras, lidar and radar that provide 360-degree coverage of its surroundings. The battery-electric skateboard platform has an aerodynamic shield at the front, while shipping containers can be attached through a twist-lock interface.",
+                "score": 0.4017588
+              },
+              {
+                "title": "FDA seeks input on telesurgery, autonomous robotics",
+                "url": "https://www.medtechdive.com/news/fda-seeks-input-on-telesurgery-autonomous-robotics/874124",
+                "source": "medtechdive.com",
+                "summary": "Rapid advances in artificial intelligence, machine learning and connectivity are driving expansion of robotic applications in a wide range of clinical settings, the FDA said. Increases in processing power, data storage and computational efficiency are enabling progress in robotic systems with autonomous capabilities. [...] In another example of teleoperation, manufacturers are developing devices that enable technicians to remotely perform ultrasounds, the FDA said. Robotic devices include stereotactic navigation systems, imaging devices and endoluminal navigation devices. [...] The FDA is asking the robotics community to submit comments on the discussion paper by Jan. 5. Ahead of that deadline, a public workshop to discuss the topics raised in the paper is scheduled for Dec. 2-3.",
+                "score": 0.38998842
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

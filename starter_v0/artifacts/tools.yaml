@@ -35,7 +35,7 @@ tools:
       required: [screenname]
 
   - name: social_search
-    description: "Tìm trên mạng xã hội."
+    description: "Search Twitter/X posts ABOUT a topic only when Twitter/social posts are part of the user's current active request. Do not call for web-only searches, news on the web, or when the user has canceled Twitter or switched to web. A shared subject does not authorize an additional social search. Use timeline for posts FROM a particular account."
     parameters:
       type: object
       properties:
@@ -45,12 +45,12 @@ tools:
       required: [query]
 
   - name: lookup
-    description: "Tra cứu thông tin trên internet."
+    description: "Search the WEB for the current subject. For web news (including Vietnamese tin, tin tức), explicitly pass topic=news. Carry news intent forward if a later turn only changes timeframe or result count. For a web-only request or a switch from Twitter to web, call lookup alone, never add social_search. Use fetch instead when reading a supplied URL."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Truy vấn"}
-        topic: {type: string, enum: [general, news], default: "general", description: "Phân loại"}
+        topic: {type: string, enum: [general, news], default: "general", description: "Explicitly use news for news requests (tin/tin tức), including follow-ups that change only time or count; preserve this intent from earlier turns. Use general for non-news research."}
         timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian"}
         max_results: {type: integer, default: 5, description: "Số kết quả"}
       required: [query]

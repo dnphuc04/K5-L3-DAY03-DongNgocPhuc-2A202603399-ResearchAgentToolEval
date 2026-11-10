@@ -1,0 +1,11 @@
+case_id,v2_pass,v3.2_pass,v3.3_pass,v3.3_failures
+G01_handle_without_at,True,True,True,
+G02_news_week,True,True,True,
+G03_top_social,True,True,True,
+G04_missing_link,False,True,True,
+G05_dedupe_existing_items,True,True,True,
+G06_fill_handle,True,True,True,
+G07_correct_handle,True,True,True,
+G08_correct_limit,True,True,True,
+G09_change_timeframe,False,False,True,
+G10_switch_source,True,False,False,extra tool call social_search

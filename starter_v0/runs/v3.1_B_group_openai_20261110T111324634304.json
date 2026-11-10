@@ -1,0 +1,385 @@
+{
+  "run_id": "v3.1_B_group_openai_20261110T111324634304",
+  "version": "v3.1",
+  "artifact_version": "v3.1+p22544b6ba695+t1f08a299bf2a",
+  "prompt_hash": "22544b6ba695ed881e9a548d812595cdaece36444cfe18020f55718a56803aae",
+  "tools_hash": "1f08a299bf2a5d15516689924aeb936278c61eade77ee7ce55aee388340bf723",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_dedupe_integration.json",
+  "dataset_id": "dedupe_integration_v1",
+  "dataset_role": "group",
+  "description": "Supplemental integration checks for dedupe; does not replace the team's required 10-case dataset.",
+  "generated_at": "2026-11-10T11:13:24",
+  "summary": {
+    "total_cases": 4,
+    "measured_cases": 4,
+    "provider_error_cases": 0,
+    "passed_cases": 4,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "D01_dedupe_urls",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Route an existing list to dedupe by URL and preserve item data.",
+        "expected_items": [
+          {
+            "title": "A",
+            "url": "https://www.example.com/post/"
+          },
+          {
+            "title": "A copy",
+            "url": "https://example.com/post?utm_source=x"
+          },
+          {
+            "title": "B",
+            "url": "https://example.com/other"
+          }
+        ]
+      },
+      "input": "Loại các link trùng trong danh sách kết quả này theo URL, giữ nguyên dữ liệu của bản đầu tiên: [{\"title\":\"A\",\"url\":\"https://www.example.com/post/\"},{\"title\":\"A copy\",\"url\":\"https://example.com/post?utm_source=x\"},{\"title\":\"B\",\"url\":\"https://example.com/other\"}]",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "by": "url"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "items": [
+                {
+                  "title": "A",
+                  "url": "https://www.example.com/post/"
+                },
+                {
+                  "title": "A copy",
+                  "url": "https://example.com/post?utm_source=x"
+                },
+                {
+                  "title": "B",
+                  "url": "https://example.com/other"
+                }
+              ],
+              "by": "url"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "dedupe",
+          "args": {
+            "items": [
+              {
+                "title": "A",
+                "url": "https://www.example.com/post/"
+              },
+              {
+                "title": "A copy",
+                "url": "https://example.com/post?utm_source=x"
+              },
+              {
+                "title": "B",
+                "url": "https://example.com/other"
+              }
+            ],
+            "by": "url"
+          },
+          "result": {
+            "tool": "dedupe",
+            "by": "url",
+            "items": [
+              {
+                "title": "A",
+                "url": "https://www.example.com/post/"
+              },
+              {
+                "title": "B",
+                "url": "https://example.com/other"
+              }
+            ],
+            "item_count": 2,
+            "removed": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "D02_dedupe_titles",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "Respect explicit title-based deduplication.",
+        "expected_items": [
+          {
+            "title": "Tin AI hôm nay"
+          },
+          {
+            "title": "tin ai hom nay"
+          },
+          {
+            "title": "Khác"
+          }
+        ]
+      },
+      "input": "Loại trùng theo tiêu đề, không so URL, giữ nguyên bản đầu tiên trong danh sách: [{\"title\":\"Tin AI hôm nay\"},{\"title\":\"tin ai hom nay\"},{\"title\":\"Khác\"}]",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "by": "title"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "items": [
+                {
+                  "title": "Tin AI hôm nay"
+                },
+                {
+                  "title": "tin ai hom nay"
+                },
+                {
+                  "title": "Khác"
+                }
+              ],
+              "by": "title"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "dedupe",
+          "args": {
+            "items": [
+              {
+                "title": "Tin AI hôm nay"
+              },
+              {
+                "title": "tin ai hom nay"
+              },
+              {
+                "title": "Khác"
+              }
+            ],
+            "by": "title"
+          },
+          "result": {
+            "tool": "dedupe",
+            "by": "title",
+            "items": [
+              {
+                "title": "Tin AI hôm nay"
+              },
+              {
+                "title": "Khác"
+              }
+            ],
+            "item_count": 2,
+            "removed": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "D03_dedupe_carryover",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "what_it_tests": "Reuse supplied items from conversation history.",
+        "expected_items": [
+          {
+            "url": "https://example.com/a"
+          },
+          {
+            "url": "https://example.com/a"
+          }
+        ]
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Danh sách đã thu thập: [{\"url\":\"https://example.com/a\"},{\"url\":\"https://example.com/a\"}]"
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn muốn xử lý danh sách này như thế nào?"
+        },
+        {
+          "role": "user",
+          "content": "Loại link trùng theo URL, giữ bản đầu tiên."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "by": "url"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "items": [
+                {
+                  "url": "https://example.com/a"
+                },
+                {
+                  "url": "https://example.com/a"
+                }
+              ],
+              "by": "url"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "dedupe",
+          "args": {
+            "items": [
+              {
+                "url": "https://example.com/a"
+              },
+              {
+                "url": "https://example.com/a"
+              }
+            ],
+            "by": "url"
+          },
+          "result": {
+            "tool": "dedupe",
+            "by": "url",
+            "items": [
+              {
+                "url": "https://example.com/a"
+              }
+            ],
+            "item_count": 1,
+            "removed": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "D04_fetch_boundary",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "what_it_tests": "A URL-reading request must use fetch rather than dedupe."
+      },
+      "input": "Đọc nội dung trang https://example.com giúp mình.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://example.com"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://example.com"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://example.com"
+          },
+          "result": {
+            "tool": "read_url",
+            "url": "https://example.com",
+            "items": [
+              {
+                "title": "Example Domain",
+                "url": "https://example.com",
+                "source": "example.com",
+                "summary": "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\nهذا النطاق مُخصص للاستخدام في أمثلة التوثيق دون الحاجة إلى إذن. هذه ليست خدمة، يُرجى تجنب الاعتماد عليها لأغراض الاختبار والمراقبة.\n\n该域名仅用于文档示例，无需获得许可。这并非一项服务，请勿将其用于测试和监控目的。\n\nL’usage de ce domaine est réservé à des exemples de documentation, sans autorisation préalable. Il ne s’agit pas d’un service ; son utilisation à des fins de test ou de surveillance est à éviter.\n\nДанный домен предназначен для использования в примерах документации без необходимости получения предварительного разрешения. Это не сервис; не рекомендуется его использование для тестирования и мониторинга.\n\nEste dominio está destinado al uso en ejemplos de documentación sin necesidad de permiso. Esto no es un servicio; evitar utilizarlo para realizar pruebas o monitoreos.\n\n [Learn more](https://iana.org/help/example-domains)"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

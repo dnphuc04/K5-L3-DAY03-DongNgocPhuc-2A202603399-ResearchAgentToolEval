@@ -1,0 +1,47 @@
+[
+  {
+    "version": "v3",
+    "case_id": "D01_dedupe_urls",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3",
+    "case_id": "D02_dedupe_titles",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3",
+    "case_id": "D03_dedupe_carryover",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.1",
+    "case_id": "D01_dedupe_urls",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.1",
+    "case_id": "D02_dedupe_titles",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.1",
+    "case_id": "D03_dedupe_carryover",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.2",
+    "case_id": "D01_dedupe_urls",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.2",
+    "case_id": "D02_dedupe_titles",
+    "exact_input_output_correct": true
+  },
+  {
+    "version": "v3.2",
+    "case_id": "D03_dedupe_carryover",
+    "exact_input_output_correct": true
+  }
+]
