@@ -1,0 +1,39 @@
+{
+  "ui": "C integrated with DemoSession",
+  "transcript": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\transcripts\\v3.4-ui-C_ui_20261110T122832_003f35ea00.transcript.json",
+  "artifact_version": "v3.4-ui-C+p41ab063811a5+t68b452aec41f",
+  "turns": [
+    {
+      "index": 1,
+      "status": "answered",
+      "tools": [
+        "lookup"
+      ],
+      "tool_errors": []
+    },
+    {
+      "index": 2,
+      "status": "waiting_for_user",
+      "tools": [
+        "clarify"
+      ],
+      "tool_errors": []
+    },
+    {
+      "index": 3,
+      "status": "answered",
+      "tools": [
+        "timeline"
+      ],
+      "tool_errors": []
+    },
+    {
+      "index": 4,
+      "status": "answered",
+      "tools": [
+        "text_stats"
+      ],
+      "tool_errors": []
+    }
+  ]
+}

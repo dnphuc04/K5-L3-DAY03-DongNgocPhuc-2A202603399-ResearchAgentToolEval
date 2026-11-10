@@ -10,19 +10,19 @@ from typing import Any
 
 import streamlit as st
 
-from chat import run_model_tool_loop
+from demo_runtime import DemoSession, now, redact
 from env_loader import load_lab_env
 from providers import make_provider
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
 from versioning import artifact_version_dict, build_artifact_version
 
 
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).resolve().parent
 ARTIFACTS_DIR = ROOT / "artifacts"
 TRANSCRIPTS_DIR = ROOT / "transcripts"
 TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
 load_lab_env(ROOT)
-LIVE_MODE_ALLOWED = os.getenv("RESEARCH_AGENT_ENABLE_LIVE_MODE", "").strip().casefold() in {"1", "true", "yes"}
+LIVE_MODE_ALLOWED = os.getenv("RESEARCH_AGENT_ENABLE_LIVE_MODE", "true" if os.getenv("OPENAI_API_KEY") else "").strip().casefold() in {"1", "true", "yes"}
 
 PROMPT_PATH = ARTIFACTS_DIR / "system_prompt.md"
 TOOLS_PATH = ARTIFACTS_DIR / "tools.yaml"
@@ -34,9 +34,9 @@ st.markdown(
     .block-container { max-width: 1120px; padding-top: 2.2rem; padding-bottom: 4rem; }
     [data-testid="stSidebar"] { border-right: 1px solid rgba(120,130,150,.18); }
     .hero { padding: 1.2rem 1.4rem; border: 1px solid rgba(120,130,150,.22);
-            border-radius: 18px; background: linear-gradient(120deg, #f4f7ff, #fbfcff); }
+            border-radius: 18px; background: linear-gradient(120deg, #162338, #172d32); color: #edf2f7; }
     .hero h1 { margin: 0; font-size: 2rem; letter-spacing: -.03em; }
-    .hero p { margin: .45rem 0 0; color: #596579; }
+    .hero p { margin: .45rem 0 0; color: #b2c3d5; }
     .muted { color: #697586; font-size: .9rem; }
     div[data-testid="stChatMessage"] { border: 1px solid rgba(120,130,150,.14); border-radius: 14px; }
     </style>
@@ -46,7 +46,7 @@ st.markdown(
 
 
 def now_iso() -> str:
-    return datetime.now().astimezone().isoformat(timespec="seconds")
+    return now()
 
 
 def init_session() -> None:
@@ -56,23 +56,36 @@ def init_session() -> None:
 
 
 def transcript_path() -> Path:
+    if st.session_state.get("active_transcript_path"):
+        return Path(st.session_state["active_transcript_path"])
     return TRANSCRIPTS_DIR / f"ui_{st.session_state['session_id']}.transcript.json"
 
 
 def save_transcript(turns: list[dict[str, Any]], mode: str, provider: str, model: str | None) -> Path:
-    version = build_artifact_version("ui", PROMPT_PATH, TOOLS_PATH)
+    if mode == "live" and "live_demo" in st.session_state:
+        demo = st.session_state["live_demo"]
+        demo.save()
+        st.session_state["active_transcript_path"] = str(demo.path)
+        return demo.path
+    version = build_artifact_version("v3.4-ui-C", PROMPT_PATH, TOOLS_PATH)
     transcript = {
         "transcript_id": f"ui_{st.session_state['session_id']}",
         **artifact_version_dict(version),
         "mode": mode,
-        "provider": provider,
-        "model": model,
+        "provider": "local" if mode == "offline_demo" else provider,
+        "model": None if mode == "offline_demo" else model,
+        "artifact_snapshot": {"system_prompt": PROMPT_PATH.read_text(encoding="utf-8-sig"),
+                              "tools": load_tool_declarations(TOOLS_PATH)},
+        "timezone": "Asia/Bangkok",
         "created_at": st.session_state.setdefault("created_at", now_iso()),
         "updated_at": now_iso(),
         "turns": turns,
     }
-    path = transcript_path()
-    path.write_text(json.dumps(transcript, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    path = TRANSCRIPTS_DIR / f"ui_{st.session_state['session_id']}.transcript.json"
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(redact(transcript), ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    temporary.replace(path)
+    st.session_state["active_transcript_path"] = str(path)
     return path
 
 
@@ -130,17 +143,12 @@ def run_live_turn(
     model: str | None,
     max_tool_rounds: int,
 ) -> dict[str, Any]:
-    provider = make_provider(provider_name)
-    prompt = PROMPT_PATH.read_text(encoding="utf-8") if PROMPT_PATH.exists() else ""
-    declarations = load_tool_declarations(TOOLS_PATH)
-    messages = [{"role": "system", "content": prompt}, *history, {"role": "user", "content": query}]
-    return run_model_tool_loop(
-        provider=provider,
-        messages=messages,
-        tools=to_openai_tools(declarations),
-        model=model,
-        max_tool_rounds=max_tool_rounds,
-    )
+    if "live_demo" not in st.session_state:
+        st.session_state["live_demo"] = DemoSession(
+            ROOT, provider=make_provider(provider_name), provider_name=provider_name,
+            model=model, version="v3.4-ui-C", max_rounds=max_tool_rounds,
+        )
+    return st.session_state["live_demo"].ask(query)
 
 
 def tool_events(turn: dict[str, Any]) -> list[dict[str, Any]]:
@@ -148,7 +156,7 @@ def tool_events(turn: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 init_session()
-artifacts = build_artifact_version("ui", PROMPT_PATH, TOOLS_PATH)
+artifacts = build_artifact_version("v3.4-ui-C", PROMPT_PATH, TOOLS_PATH)
 declarations = load_tool_declarations(TOOLS_PATH)
 
 with st.sidebar:
@@ -182,11 +190,23 @@ with st.sidebar:
     with st.expander("Danh sách tool"):
         for item in declarations:
             st.markdown(f"- `{item['name']}`")
-    if st.button("Xóa transcript và bắt đầu phiên mới", use_container_width=True):
+    st.caption("Telegram: tắt gửi trong demo. Transcript tự lưu; key không hiển thị.")
+    if st.button("Cuộc trò chuyện mới (giữ log cũ)", use_container_width=True):
         st.session_state["turns"] = []
         st.session_state["session_id"] = uuid.uuid4().hex[:10]
         st.session_state["created_at"] = now_iso()
+        st.session_state.pop("live_demo", None)
+        st.session_state.pop("active_transcript_path", None)
         st.rerun()
+
+settings = (offline, provider_name, model, max_rounds)
+if st.session_state.get("active_settings", settings) != settings:
+    st.session_state["turns"] = []
+    st.session_state["session_id"] = uuid.uuid4().hex[:10]
+    st.session_state["created_at"] = now_iso()
+    st.session_state.pop("live_demo", None)
+    st.session_state.pop("active_transcript_path", None)
+st.session_state["active_settings"] = settings
 
 st.markdown(
     '<section class="hero"><h1>🔎 Research Agent</h1>'
@@ -196,7 +216,7 @@ st.markdown(
 if offline:
     st.info("Đang ở chế độ demo offline: yêu cầu mẫu chạy trực tiếp tool cục bộ, không dùng model và không truy cập mạng.")
 else:
-    st.caption(f"Đang dùng provider: **{provider_name}** · Kiểm tra `.env` để cấu hình API key trước khi gửi.")
+    st.caption(f"Live · **{provider_name}** · prompt v3.4 + tools của C · log từng bước, tự động che key.")
 
 st.markdown("#### Thử nhanh")
 sample_cols = st.columns(3)
@@ -205,12 +225,16 @@ samples = [
     "Tính phần trăm tăng trưởng doanh thu từ 200 lên 300.",
     "Loại bỏ mục trùng URL khỏi danh sách kết quả nghiên cứu.",
 ]
+if not offline:
+    samples = ["Tìm 2 tin tức AI hôm nay trên web.",
+               "Tóm tắt 3 tweet mới nhất giúp mình.",
+               "Đếm số từ trong văn bản này: AI hỗ trợ nghiên cứu và phân tích dữ liệu."]
 for col, sample in zip(sample_cols, samples):
-    if col.button(sample, use_container_width=True, disabled=not offline):
+    if col.button(sample, use_container_width=True):
         st.session_state["pending_input"] = sample
         st.rerun()
 
-for turn in st.session_state["turns"]:
+for turn in redact(st.session_state["turns"]):
     with st.chat_message("user"):
         st.markdown(turn["user"])
     with st.chat_message("assistant"):
@@ -254,16 +278,20 @@ if query:
                         st.code(json.dumps(event.get("args", {}), ensure_ascii=False, indent=2), language="json")
                         st.json(event.get("result", {}))
             turn_record = {"turn_index": len(st.session_state["turns"]) + 1, "timestamp": now_iso(), "user": query, **turn}
+            turn_record = redact(turn_record)
             st.session_state["turns"].append(turn_record)
             path = save_transcript(st.session_state["turns"], "offline_demo" if offline else "live", provider_name, model)
             st.caption(f"Transcript ghi nhận: `{path.relative_to(ROOT).as_posix()}`")
         except Exception as exc:
-            message = f"{type(exc).__name__}: {exc}"
+            message = redact(f"{type(exc).__name__}: {exc}")
             st.error(message)
-            error_turn = {"turn_index": len(st.session_state["turns"]) + 1, "timestamp": now_iso(), "user": query, "assistant_text": "Lượt này gặp lỗi khi chạy.", "status": "error", "error": message, "rounds": [], "tool_events": []}
+            error_turn = redact({"turn_index": len(st.session_state["turns"]) + 1, "timestamp": now_iso(), "user": query, "assistant_text": "Lượt này gặp lỗi khi chạy.", "status": "error", "error": message, "rounds": [], "tool_events": []})
             st.session_state["turns"].append(error_turn)
             path = save_transcript(st.session_state["turns"], "offline_demo" if offline else "live", provider_name, model)
             st.caption(f"Lượt lỗi cũng đã ghi transcript: `{path.relative_to(ROOT).as_posix()}`")
 
 if st.session_state["turns"]:
     st.markdown(f'<p class="muted">Số lượt đã ghi: {len(st.session_state["turns"])} · Transcript: <code>{transcript_path().relative_to(ROOT).as_posix()}</code></p>', unsafe_allow_html=True)
+    if transcript_path().exists():
+        st.download_button("Tải transcript JSON", data=transcript_path().read_text(encoding="utf-8"),
+                           file_name=transcript_path().name, mime="application/json")
