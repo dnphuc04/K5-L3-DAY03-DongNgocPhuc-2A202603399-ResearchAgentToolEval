@@ -191,6 +191,12 @@ Không thực hiện bonus local model; không có số liệu Ollama để báo
             report += f"- {data['suite']}: **{s['passed_cases']}/{s['total_cases']} PASS**, routing={s['tool_routing_accuracy']}, args={s['argument_accuracy']}; artifact `{data['artifact_version']}`; `runs/{path.name}`. Tool execution error cases: {tool_errors}.\n"
         report += '\nBộ mở rộng v3.4-ui group 9/10 -> v3.5 10/10; G08 đã truyền Latest tường minh. Base giữ 20/20. Không xóa lần regression trước. Các điểm là routing/args, không suy ra toàn bộ API dữ liệu hoạt động.\n'
         report += 'Snapshot cuối artifacts/versions/v3.5/. Unit tests: 124 passed, 0 failed/skipped. chat.py đã có 3 lượt live trong B4. Đối chiếu chi tiết: artifacts/README_AUDIT.md. Link demo được hoãn theo yêu cầu; tên thành viên bổ sung sau. Không khẳng định deadline Phần A đã được đáp ứng khi chưa có bằng chứng thời điểm.\n'
+    # Keep the team's manually edited names/student IDs across regeneration.
+    if '## Team\n' in previous and '# PHẦN A' in previous:
+        team = previous.split('## Team\n', 1)[1].split('# PHẦN A', 1)[0]
+        start = report.index('## Team\n') + len('## Team\n')
+        end = report.index('# PHẦN A', start)
+        report = report[:start] + team + report[end:]
     report_path.write_text(report, encoding='utf-8')
     snapshot = ROOT / 'artifacts/versions/v3.4-ui'
     snapshot.mkdir(parents=True, exist_ok=True)
