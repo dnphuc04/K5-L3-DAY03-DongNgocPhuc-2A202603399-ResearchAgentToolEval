@@ -1,0 +1,39 @@
+{
+  "validation_method": "Streamlit AppTest with real OpenAI and research APIs",
+  "transcript": "D:\\Work\\26AI20K\\K5-L3-DAY03-DongNgocPhuc-2A202603399-ResearchAgentToolEval\\starter_v0\\transcripts\\v3.4_ui_20261110T115230_2c4a8476b2.transcript.json",
+  "artifact_version": "v3.4+p41ab063811a5+t3b41d41b278e",
+  "turns": [
+    {
+      "turn_index": 1,
+      "status": "answered",
+      "tool_names": [
+        "lookup"
+      ],
+      "tool_errors": []
+    },
+    {
+      "turn_index": 2,
+      "status": "waiting_for_user",
+      "tool_names": [
+        "clarify"
+      ],
+      "tool_errors": []
+    },
+    {
+      "turn_index": 3,
+      "status": "answered",
+      "tool_names": [
+        "timeline"
+      ],
+      "tool_errors": []
+    },
+    {
+      "turn_index": 4,
+      "status": "answered",
+      "tool_names": [
+        "dedupe"
+      ],
+      "tool_errors": []
+    }
+  ]
+}
