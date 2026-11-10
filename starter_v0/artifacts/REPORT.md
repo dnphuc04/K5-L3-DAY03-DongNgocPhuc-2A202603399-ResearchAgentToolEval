@@ -11,7 +11,7 @@
 | B — phân tích lỗi và eval nhóm | Nguyễn Vũ Hoàng | 2A202603491 |
 | Lead — Phúc | Chưa điền | Chưa điền |
 | Tool mới | Nguyễn Trần Tiến | 2A202603504 |
-| C — UI và demo | Nguyễn Việt Hưng | 2A202603411|
+| UI và demo | Nguyễn Việt Hưng | 2A202603411|
 - Provider/model: OpenAI / gpt-4o-mini. Snapshot đo chuẩn: `v3.4+p41ab063811a5+t3b41d41b278e`; xem kết quả bộ tools mở rộng cuối tại mục B3 bổ sung.
 
 # PHẦN A — Giới thiệu agent
