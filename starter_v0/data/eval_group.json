@@ -1,7 +1,265 @@
 {
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "10 case nhóm: 5 single turn và 5 multi turn; G05 kiểm tra routing và arguments của tool mới dedupe. Cần tích hợp khai báo dedupe trước khi chạy suite.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_handle_without_at",
+      "phase": "B",
+      "query": "Lấy 3 tweet mới nhất của tài khoản @NASA.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Bỏ @ khỏi handle và giữ đúng limit=3."
+      }
+    },
+    {
+      "id": "G02_news_week",
+      "phase": "B",
+      "query": "Tìm 4 tin tức trên web về robotics trong tuần này.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week",
+              "max_results": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Tin web phải dùng lookup, topic=news, timeframe=week, max_results=4. Không ép cách viết query."
+      }
+    },
+    {
+      "id": "G03_top_social",
+      "phase": "B",
+      "query": "Tìm 2 tweet nổi bật nhất về robotics, ưu tiên phổ biến chứ không phải mới nhất.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Tìm theo chủ đề dùng social_search; phổ biến dùng Top thay vì Latest."
+      }
+    },
+    {
+      "id": "G04_missing_link",
+      "phase": "B",
+      "query": "Hãy đọc và tóm tắt bài báo mình nhắc đến; mình chưa gửi đường link hay nội dung.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Thiếu URL/nội dung phải hỏi lại, không tự tạo URL. Kiểm tra thủ công câu hỏi có xin URL không."
+      }
+    },
+    {
+      "id": "G05_dedupe_existing_items",
+      "phase": "B",
+      "query": "Chỉ loại bỏ các mục trùng URL trong danh sách đã có dưới đây, giữ mục xuất hiện đầu tiên. Không tìm kiếm thêm và chưa định dạng bản tin. Danh sách: [{\"title\":\"Tin A\",\"url\":\"https://www.example.com/post/\"},{\"title\":\"Bản sao A\",\"url\":\"https://example.com/post?utm_source=demo#intro\"},{\"title\":\"Tin B\",\"url\":\"https://example.com/other\"}].",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "by": "url"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Danh s?ch ?? c?, y?u c?u b? tr?ng URL: ch? g?i dedupe(by=url), kh?ng lookup/fetch/format. Ki?m tra th? c?ng actual_tool_calls.args.items ph?i l? nguy?n 3 m?c trong query, ??ng th? t?; tool_results ph?i c? item_count=2, removed=1 v? gi? Tin A, Tin B. Kh?ng ch?m items t? ??ng v? normalize_value hi?n sorted(list_of_dict) g?y TypeError."
+      }
+    },
+    {
+      "id": "G06_fill_handle",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy 4 tweet gần nhất giúp mình."
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn muốn lấy tweet của tài khoản nào?"
+        },
+        {
+          "role": "user",
+          "content": "Tài khoản @NASA nhé."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "NASA",
+              "limit": 4
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Kết hợp limit ở lượt đầu với handle vừa được bổ sung; không hỏi lại khi đã đủ thông tin."
+      }
+    },
+    {
+      "id": "G07_correct_handle",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy 2 tweet mới nhất của @NASA."
+        },
+        {
+          "role": "user",
+          "content": "Mình nhầm, đổi sang @SpaceX, vẫn lấy 2 tweet."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "SpaceX",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Dùng handle sửa ở lượt cuối, không gọi thêm timeline cho handle cũ."
+      }
+    },
+    {
+      "id": "G08_correct_limit",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm 6 tweet mới nhất về robotics."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ lấy 2 tweet thôi, chủ đề và cách sắp xếp giữ nguyên."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Latest",
+              "limit": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Cập nhật limit=2 và giữ Latest; kiểm tra thủ công query vẫn về robotics."
+      }
+    },
+    {
+      "id": "G09_change_timeframe",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm 3 tin web về robotics hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Mở rộng sang cả tháng này, vẫn 3 tin và cùng chủ đề."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "month",
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Đổi day sang month, giữ topic=news và số lượng; kiểm tra thủ công query vẫn về robotics."
+      }
+    },
+    {
+      "id": "G10_switch_source",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm tweet mới nhất về robotics."
+        },
+        {
+          "role": "user",
+          "content": "Thôi không tìm tweet nữa. Chỉ tìm 3 tin tức web về robotics hôm nay."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Lượt cuối chuyển nguồn sang web; chỉ gọi lookup, không gọi thêm social_search."
+      }
+    }
+  ]
 }

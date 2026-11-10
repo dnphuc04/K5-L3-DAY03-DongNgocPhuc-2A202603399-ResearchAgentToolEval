@@ -1,0 +1,25 @@
+# Gửi Phúc: thêm object dưới tools: trong artifacts/tools.yaml.
+# File đề xuất riêng, chưa thay đổi prompt/tools dùng cho baseline.
+tools:
+  - name: dedupe
+    description: "Loại bỏ mục trùng trong danh sách đã có, giữ mục đầu tiên. Dùng trước khi tổng hợp khi user yêu cầu bỏ trùng theo URL hoặc tiêu đề. Không tìm kiếm, không đọc URL, không định dạng hay gửi bản tin. Truyền nguyên danh sách đầu vào, không tự bỏ trùng trước khi gọi."
+    parameters:
+      type: object
+      properties:
+        items:
+          type: array
+          description: "Danh sách mục đã thu thập, giữ nguyên nội dung và thứ tự đầu vào."
+          items:
+            type: object
+            properties:
+              title: {type: string}
+              url: {type: string}
+              source: {type: string}
+              summary: {type: string}
+              section: {type: string}
+        by:
+          type: string
+          enum: [url, title]
+          default: url
+          description: "url: bỏ trùng URL sau chuẩn hóa host/www/dấu slash cuối/utm/fragment. title: bỏ trùng tiêu đề không phân biệt hoa thường, dấu và khoảng trắng. Chọn rõ theo yêu cầu người dùng."
+      required: [items, by]

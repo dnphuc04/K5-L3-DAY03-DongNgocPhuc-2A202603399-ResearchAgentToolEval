@@ -1,0 +1,21 @@
+{
+  "run_file": "starter_v0\\runs\\v2_B_group_openai_20261110T111141081146.json",
+  "G05": {
+    "input_preserved": true,
+    "output_keeps_first_and_third": true,
+    "item_count_2": true,
+    "removed_1": true
+  },
+  "topic_queries": {
+    "G02_news_week": "robotics",
+    "G03_top_social": "robotics",
+    "G08_correct_limit": "robotics",
+    "G09_change_timeframe": "robotics",
+    "G10_switch_source": "robotics"
+  },
+  "G04": {
+    "question_requests_link_or_content": true,
+    "runtime_response_type": "text",
+    "explicit_response_type_missing": true
+  }
+}
