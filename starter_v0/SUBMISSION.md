@@ -8,8 +8,8 @@
 6. Eval nộp cuối (API thật, có tính phí):
 
 ```powershell
-python run_eval.py --provider openai --version v3.4-ui --suite base --eval-cases data/eval_base.json
-python run_eval.py --provider openai --version v3.4-ui --suite group --eval-cases data/eval_group.json
+python run_eval.py --provider openai --version v3.5 --suite base --eval-cases data/eval_base.json
+python run_eval.py --provider openai --version v3.5 --suite group --eval-cases data/eval_group.json
 ```
 
 Mỗi lần gọi model có thể cho kết quả khác nhau. Giữ mọi run và phân biệt điểm routing/args với lỗi thực thi tool do thiếu key.
@@ -18,4 +18,5 @@ Các snapshot prompt/tools cũ ở artifacts/versions/. Dùng --system-prompt v�
 
 Gói ZIP được tạo bằng `python scripts/finalize_submission.py`, gồm starter_v0 và các bằng chứng; không có .env, .venv hoặc cache. Script này cập nhật REPORT từ log, nên bổ sung tên thành viên/link public sau khi tạo gói lần cuối hoặc cập nhật script trước.
 
-Trước khi nộp: trưởng nhóm điền tên/họ tên thành viên và URL public vào REPORT rồi cập nhật ZIP tương ứng. Không đưa API key vào báo cáo, ảnh hoặc ZIP.
+Phiên bản cuối v3.5: base 20/20, group 10/10; có transcript 3 lượt qua chat.py. Xem artifacts/README_AUDIT.md.
+Theo yêu cầu chủ bài, link demo để sau; tên thành viên bổ sung sau. Sau khi bổ sung hãy cập nhật ZIP. Không đưa API key vào báo cáo, ảnh hoặc ZIP.

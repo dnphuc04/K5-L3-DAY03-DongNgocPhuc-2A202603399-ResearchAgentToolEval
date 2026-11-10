@@ -67,6 +67,8 @@ Baseline chính của nhóm là 65%; B có một lần chạy khác cùng artifa
 
 
 
+
+
 Phân tích bởi B, nguồn: `runs/v0_B_base_openai_20261110T103030701042.json`.
 Provider/model: OpenAI / gpt-4o-mini. Artifact: `v0+peb1c8179815b+t5b22a2476d41`.
 Baseline: 15/20 case pass (75%), routing 80%, arguments 75%, multi turn 100%, provider errors 0.
@@ -81,6 +83,8 @@ Baseline: 15/20 case pass (75%), routing 80%, arguments 75%, multi turn 100%, pr
 | R13_parallel_web_and_tweets | Case gắn nhãn wrong_tool; lỗi quan sát là wrong_arg_value | lookup(query=AI news, timeframe=day, max_results=5) và social_search(query=AI, search_type=Latest, limit=5) | Gọi đủ 2 tool; lookup thiếu topic=news, query khác chuỗi AI mà eval yêu cầu | Đề xuất: làm rõ args cho tin tức; ghi nhận query gần nghĩa vẫn fail do bộ chấm so khớp chuỗi |
 
 R08/R12 không thực sự gửi Telegram: tool trả `needs_confirmation`. R10/R11/R13 có lỗi tool do thiếu RAPIDAPI_KEY, FIRECRAWL_API_KEY hoặc TAVILY_API_KEY. Không có provider_error không có nghĩa API tool đã hoạt động. Các lỗi setup này cần theo dõi riêng với lỗi chọn tool/args.
+
+
 
 
 
@@ -116,13 +120,13 @@ Lần lỗi mạng `runs/v2_B_group_openai_20261110T111059265125.json` có measu
 
 ## B4. Live Chat Evidence
 
-Nguồn: `transcripts/v3.4_submission_live_20261110T121557.transcript.json`, artifact `v3.4+p41ab063811a5+t3b41d41b278e`. Đây là 3 lượt kiểm tra được script gửi tới model thật, không phải log mô phỏng hoặc buổi người dùng thao tác UI; script: `scripts/submission_live_check.py`. Các transcript CLI/UI thực tế trước đó cũng giữ trong transcripts/.
+Nguồn: `transcripts/v3.5_openai_20261110T123153675177.transcript.json`, artifact `v3.5+p41ab063811a5+t01fe59047a58`. Đây là 3 lượt qua chính chat.py với OpenAI thật; script scripts/verify_cli_live.py cung cấp input qua stdin, không mock model hay kết quả. Console và kiểm tra: analysis/cli_v3_5_console.txt, analysis/cli_v3_5_checks.json. Không coi đây là buổi người dùng thao tác UI; các transcript cũ được giữ nguyên.
 
 | Lượt | Yêu cầu | Tool | Trạng thái |
 |---|---|---|---|
-| 1 | Chỉ bỏ trùng URL, giữ mục đầu tiên, chưa định dạng | dedupe | answered |
-| 2 | Đọc bài báo này và tóm tắt giúp mình. Mình chưa gửi URL hoặc nội dung. | clarify | waiting_for_user |
-| 3 | Thôi không đọc bài nữa. Chỉ bỏ trùng theo tiêu đề trong danh sách mới này | dedupe | answered |
+| 1 | Chỉ bỏ trùng URL, giữ mục đầu tiên | dedupe | answered |
+| 2 | Đọc bài báo này giúp mình, mình chưa gửi link hay nội dung. | clarify | waiting_for_user |
+| 3 | Hủy yêu cầu đọc bài. Chỉ bỏ trùng tiêu đề trong danh sách mới | dedupe | answered |
 
 Lượt 1 xác minh bỏ trùng URL; lượt 2 agent dừng để xin URL; lượt 3 nhận yêu cầu thay thế và bỏ trùng tiêu đề. Không tính tin nhắn “exit” ở transcript cũ là lượt demo chức năng. Các transcript cũ ghi đúng v2, không đổi nhãn thành v3.4.
 
@@ -163,3 +167,13 @@ Sau commit a8f881e, thêm 4 tool làm thay đổi tools hash. Giữ nguyên data
 
 G08 của bộ tools mở rộng thiếu search_type tường minh; social_search mặc định Latest nên không đồng nhất với sai cách sắp xếp thực tế. Vẫn giữ FAIL theo cách chấm hiện tại. G04/G09 đã PASS. Unit test cuối: **124 passed, 0 failed, 0 skipped**.
 Snapshot bộ mở rộng tại artifacts/versions/v3.4-ui/. UI hiện dùng bộ mở rộng; không gắn nhãn/hashes của snapshot cũ cho bộ này.
+
+## Hoàn thiện checklist README — phiên bản nộp v3.5
+
+Giả thuyết duy nhất: declaration đầy đủ về trách nhiệm/ranh giới và args tường minh giúp giảm lỗi thiếu optional arguments mà không làm giảm routing. Chỉ sửa tools.yaml; prompt và 10 case nhóm giữ nguyên. Đã viết lại description cả 15 tool, conventions handle/news/timeframe/Top/Latest và send confirmed=true.
+
+- base: **20/20 PASS**, routing=1.0, args=1.0; artifact `v3.5+p41ab063811a5+t01fe59047a58`; `runs/v3.5_B_base_openai_20261110T123153250905.json`. Tool execution error cases: 14.
+- group: **10/10 PASS**, routing=1.0, args=1.0; artifact `v3.5+p41ab063811a5+t01fe59047a58`; `runs/v3.5_B_group_openai_20261110T123134063424.json`. Tool execution error cases: 8.
+
+Bộ mở rộng v3.4-ui group 9/10 -> v3.5 10/10; G08 đã truyền Latest tường minh. Base giữ 20/20. Không xóa lần regression trước. Các điểm là routing/args, không suy ra toàn bộ API dữ liệu hoạt động.
+Snapshot cuối artifacts/versions/v3.5/. Unit tests: 124 passed, 0 failed/skipped. chat.py đã có 3 lượt live trong B4. Đối chiếu chi tiết: artifacts/README_AUDIT.md. Link demo được hoãn theo yêu cầu; tên thành viên bổ sung sau. Không khẳng định deadline Phần A đã được đáp ứng khi chưa có bằng chứng thời điểm.

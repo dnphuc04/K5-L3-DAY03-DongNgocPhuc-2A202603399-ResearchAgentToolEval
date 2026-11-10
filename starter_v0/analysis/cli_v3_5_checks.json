@@ -1,0 +1,8 @@
+{
+  "source": "real chat.py subprocess with scripted input and live OpenAI replies",
+  "transcript": "transcripts/v3.5_openai_20261110T123153675177.transcript.json",
+  "functional_turns": 3,
+  "url_dedupe_correct": true,
+  "missing_url_waits": true,
+  "title_dedupe_correct": true
+}

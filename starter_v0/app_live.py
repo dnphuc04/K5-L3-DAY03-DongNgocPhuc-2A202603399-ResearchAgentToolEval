@@ -22,7 +22,7 @@ st.caption("Tìm nguồn, đọc tài liệu và làm sạch dữ liệu — có
 with st.sidebar:
     st.header("Phiên làm việc")
     provider_name = st.selectbox("Provider", ["openai", "openrouter", "anthropic", "gemini", "ollama"])
-    version = st.text_input("Nhãn phiên bản", "v3.4")
+    version = st.text_input("Nhãn phiên bản", "v3.5")
     model = st.text_input("Model (để trống dùng mặc định)", "")
     rounds = st.slider("Số vòng tool tối đa", 1, 8, 4)
     st.caption("Dùng prompt/tools hiện có trong artifacts/. Nhãn phiên bản không tự đổi nội dung file.")

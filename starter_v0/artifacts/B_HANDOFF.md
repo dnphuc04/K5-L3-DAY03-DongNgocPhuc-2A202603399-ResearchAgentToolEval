@@ -1,5 +1,9 @@
 # Phần việc của B — phân tích baseline và eval nhóm
 
+## Kết quả hoàn thiện cuối v3.5
+
+Đã hoàn thiện description/ranh giới của 15 tool và convention args trong tools.yaml theo README, giữ nguyên prompt và dataset. v3.5 đạt base 20/20, group 10/10; 124 unit test pass. Có phiên chat.py 3 lượt live với input scripted qua stdin, transcript v3.5_openai_20261110T123153675177.transcript.json và kiểm tra tại analysis/cli_v3_5_checks.json. Đối chiếu yêu cầu: artifacts/README_AUDIT.md. Link demo hoãn, tên thành viên bổ sung sau theo chỉ đạo người dùng. Các mục cũ dưới đây là lịch sử, không phải trạng thái cuối.
+
 ## Bản bàn giao khi chuẩn bị nộp
 
 Đọc REPORT.md để xem trạng thái cuối; các mục phía dưới giữ làm lịch sử làm bài.

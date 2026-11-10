@@ -41,7 +41,7 @@ def main():
         calls = c['expect'].get('tool_calls', [])
         expected = ', '.join(x['name'] + '(' + json.dumps(x.get('args', {}), ensure_ascii=False) + ')' for x in calls)
         case_rows.append(f"| {c['id']} | {'Multi' if 'turns' in c else 'Single'} | `{expected}` | {'PASS' if old_map[c['id']] else 'FAIL'} | {'PASS' if final_map[c['id']] else 'FAIL'} |")
-    live_paths = sorted((ROOT / 'transcripts').glob('v3.4_submission_live_*.json'))
+    live_paths = sorted((ROOT / 'transcripts').glob('v3.5_openai_*.json')) or sorted((ROOT / 'transcripts').glob('v3.4_submission_live_*.json'))
     live = json.loads(live_paths[-1].read_text(encoding='utf-8'))
     live_name = 'transcripts/' + live_paths[-1].name
     live_rows = []
@@ -125,7 +125,7 @@ Lần lỗi mạng `runs/v2_B_group_openai_20261110T111059265125.json` có measu
 
 ## B4. Live Chat Evidence
 
-Nguồn: `{live_name}`, artifact `{live['artifact_version']}`. Đây là 3 lượt kiểm tra được script gửi tới model thật, không phải log mô phỏng hoặc buổi người dùng thao tác UI; script: `scripts/submission_live_check.py`. Các transcript CLI/UI thực tế trước đó cũng giữ trong transcripts/.
+Nguồn: `{live_name}`, artifact `{live['artifact_version']}`. Đây là 3 lượt qua chính chat.py với OpenAI thật; script scripts/verify_cli_live.py cung cấp input qua stdin, không mock model hay kết quả. Console và kiểm tra: analysis/cli_v3_5_console.txt, analysis/cli_v3_5_checks.json. Không coi đây là buổi người dùng thao tác UI; các transcript cũ được giữ nguyên.
 
 | Lượt | Yêu cầu | Tool | Trạng thái |
 |---|---|---|---|
@@ -177,11 +177,27 @@ Không thực hiện bonus local model; không có số liệu Ollama để báo
                     report += f"  - {item['id']}: {'; '.join(item['result']['failures'])}.\n"
         report += '\nG08 của bộ tools mở rộng thiếu search_type tường minh; social_search mặc định Latest nên không đồng nhất với sai cách sắp xếp thực tế. Vẫn giữ FAIL theo cách chấm hiện tại. G04/G09 đã PASS. Unit test cuối: **124 passed, 0 failed, 0 skipped**.\n'
         report += 'Snapshot bộ mở rộng tại artifacts/versions/v3.4-ui/. UI hiện dùng bộ mở rộng; không gắn nhãn/hashes của snapshot cũ cho bộ này.\n'
+    latest_runs = []
+    for suite in ('base', 'group'):
+        paths = sorted((ROOT / 'runs').glob(f'v3.5_B_{suite}_openai_*.json'))
+        if paths:
+            latest_runs.append((paths[-1], json.loads(paths[-1].read_text(encoding='utf-8'))))
+    if latest_runs:
+        report += '\n## Hoàn thiện checklist README — phiên bản nộp v3.5\n\n'
+        report += 'Giả thuyết duy nhất: declaration đầy đủ về trách nhiệm/ranh giới và args tường minh giúp giảm lỗi thiếu optional arguments mà không làm giảm routing. Chỉ sửa tools.yaml; prompt và 10 case nhóm giữ nguyên. Đã viết lại description cả 15 tool, conventions handle/news/timeframe/Top/Latest và send confirmed=true.\n\n'
+        for path, data in latest_runs:
+            s = data['summary']
+            tool_errors = sum(any(e.get('result', {}).get('error') for e in c.get('tool_results', [])) for c in data['results'])
+            report += f"- {data['suite']}: **{s['passed_cases']}/{s['total_cases']} PASS**, routing={s['tool_routing_accuracy']}, args={s['argument_accuracy']}; artifact `{data['artifact_version']}`; `runs/{path.name}`. Tool execution error cases: {tool_errors}.\n"
+        report += '\nBộ mở rộng v3.4-ui group 9/10 -> v3.5 10/10; G08 đã truyền Latest tường minh. Base giữ 20/20. Không xóa lần regression trước. Các điểm là routing/args, không suy ra toàn bộ API dữ liệu hoạt động.\n'
+        report += 'Snapshot cuối artifacts/versions/v3.5/. Unit tests: 124 passed, 0 failed/skipped. chat.py đã có 3 lượt live trong B4. Đối chiếu chi tiết: artifacts/README_AUDIT.md. Link demo được hoãn theo yêu cầu; tên thành viên bổ sung sau. Không khẳng định deadline Phần A đã được đáp ứng khi chưa có bằng chứng thời điểm.\n'
     report_path.write_text(report, encoding='utf-8')
     snapshot = ROOT / 'artifacts/versions/v3.4-ui'
     snapshot.mkdir(parents=True, exist_ok=True)
     for name in ('system_prompt.md', 'tools.yaml'):
-        (snapshot / name).write_bytes((ROOT / 'artifacts' / name).read_bytes())
+        # Never overwrite a historical snapshot with today's declarations.
+        if not (snapshot / name).exists():
+            (snapshot / name).write_bytes((ROOT / 'artifacts' / name).read_bytes())
     # Additional measurement row; do not rewrite the lead's experimental history.
     log_path = ROOT / 'artifacts/version_log.csv'
     run_name = 'runs/v3.4_B_group_openai_20261110T121028534135.json'
@@ -205,6 +221,19 @@ Không thực hiện bonus local model; không có số liệu Ollama để báo
                    reason=f"Final expanded toolset; suite={data['suite']}; preserve all results including omitted optional args",
                    hypothesis='Expanded toolset retains research routing behavior', metric_before='See v3.4 snapshot runs',
                    metric_after=json.dumps(data['summary']), run_file='runs/' + path.name)
+        with log_path.open('a', encoding='utf-8', newline='') as f:
+            csv.DictWriter(f, fieldnames=list(row)).writerow(row)
+    with log_path.open(encoding='utf-8-sig', newline='') as f:
+        recorded = {x['run_file'] for x in csv.DictReader(f)}
+    for path, data in latest_runs:
+        if 'runs/' + path.name in recorded:
+            continue
+        row = dict.fromkeys(rows[0], '')
+        row.update(version='v3.5', author='submission completion', changed_artifact='artifacts/tools.yaml descriptions and argument conventions only',
+                   artifact_version=data['artifact_version'], prompt_hash=data['prompt_hash'], tools_hash=data['tools_hash'],
+                   reason=f"README checklist completion; suite={data['suite']}; prompt/dataset unchanged",
+                   hypothesis='Clear responsibilities, boundaries and explicit argument conventions remove omitted-argument failures without routing regression',
+                   metric_before='base=1.0; group=0.9 on expanded v3.4-ui', metric_after=json.dumps(data['summary']), run_file='runs/' + path.name)
         with log_path.open('a', encoding='utf-8', newline='') as f:
             csv.DictWriter(f, fieldnames=list(row)).writerow(row)
     archive = ROOT.parent / 'ResearchAgent_Submission.zip'
