@@ -9,7 +9,7 @@
 | Vai trò | Họ và tên | Mã sinh viên |
 |---|---|---|
 | B — phân tích lỗi và eval nhóm | Nguyễn Vũ Hoàng | 2A202603491 |
-| Lead — Phúc | Chưa điền | Chưa điền |
+| Tối ưu prompt/tools qua các version và ghi version log | Đồng Ngọc Phúc | 2A202603399 |
 | Tool mới | Nguyễn Trần Tiến | 2A202603504 |
 | UI và demo | Nguyễn Việt Hưng | 2A202603411|
 - Provider/model: OpenAI / gpt-4o-mini. Snapshot đo chuẩn: `v3.4+p41ab063811a5+t3b41d41b278e`; xem kết quả bộ tools mở rộng cuối tại mục B3 bổ sung.
